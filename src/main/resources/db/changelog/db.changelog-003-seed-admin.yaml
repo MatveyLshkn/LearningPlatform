@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-seed-admin-user
+      author: codex
+      changes:
+        - sql:
+            dbms: postgresql
+            sql: >
+              INSERT INTO users (id, keycloak_sub, username, email, role, created_at)
+              VALUES ('2b2261fb-c337-46a5-94f1-af1f32a8e111',
+                      '8f83d1f0-8b39-4b96-9d5d-c39d7ad8f111',
+                      'admin',
+                      'admin@learning-platform.local',
+                      'ADMIN',
+                      CURRENT_TIMESTAMP)
+              ON CONFLICT (keycloak_sub) DO UPDATE
+              SET username = EXCLUDED.username,
+                  email = EXCLUDED.email,
+                  role = EXCLUDED.role;

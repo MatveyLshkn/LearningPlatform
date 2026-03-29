@@ -1,0 +1,78 @@
+spring:
+  application:
+    name: learning-platform
+  threads:
+    virtual:
+      enabled: true
+  jackson:
+    property-naming-strategy: LOWER_CAMEL_CASE
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/learning_platform}
+    username: ${DB_USERNAME:learning}
+    password: ${DB_PASSWORD:learning}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 4
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/learning-platform}
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+springdoc:
+  api-docs:
+    path: /openapi
+  swagger-ui:
+    path: /swagger-ui.html
+    persistAuthorization: true
+    displayRequestDuration: true
+
+learning-platform:
+  security:
+    principal-claim: preferred_username
+    role-claim-path: realm_access.roles
+  keycloak:
+    admin-url: ${KEYCLOAK_ADMIN_URL:http://localhost:8081}
+    realm: ${KEYCLOAK_REALM:learning-platform}
+    client-id: ${KEYCLOAK_CLIENT_ID:learning-platform-backend}
+    client-secret: ${KEYCLOAK_CLIENT_SECRET:change-me}
+  pagination:
+    default-limit: 20
+    max-limit: 100
+  liquibase:
+    enabled: true
+    changeLog: classpath:/db/changelog/db.changelog-master.yaml
+
+logging:
+  level:
+    root: INFO
+    org.springframework.security: INFO

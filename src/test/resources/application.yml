@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:17:///learning_platform
+    username: learning
+    password: learning
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create-drop
+learning-platform:
+  security:
+    principal-claim: preferred_username
+    role-claim-path: realm_access.roles
+  keycloak:
+    admin-url: http://localhost:8081
+    realm: learning-platform
+    client-id: learning-platform-backend
+    client-secret: change-me
+  pagination:
+    default-limit: 20
+    max-limit: 100
+  liquibase:
+    enabled: true
+    changeLog: classpath:/db/changelog/db.changelog-master.yaml
+
+logging:
+  level:
+    root: WARN
+    org.springframework.web.servlet.handler.HandlerMappingIntrospector: ERROR

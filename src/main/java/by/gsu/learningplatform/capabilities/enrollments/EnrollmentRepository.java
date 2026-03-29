@@ -1,0 +1,16 @@
+package by.gsu.learningplatform.capabilities.enrollments;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UUID> {
+
+    Optional<EnrollmentEntity> findByUserIdAndCourseId(UUID userId, UUID courseId);
+
+    List<EnrollmentEntity> findByUserId(UUID userId);
+
+    long countByCourseId(UUID courseId);
+}

@@ -1,0 +1,313 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-tables
+      author: codex
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: keycloak_sub
+                  type: VARCHAR(128)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: username
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: VARCHAR(16)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: courses
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: teacher_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: enrollments
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: course_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: enrolled_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: lessons
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: course_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: content
+                  type: TEXT
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: lectures
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: lesson_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: video_url
+                  type: TEXT
+              - column:
+                  name: content
+                  type: TEXT
+
+        - createTable:
+            tableName: assessments
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: course_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: submissions
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: assessment_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: student_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: answer_text
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: score
+                  type: INTEGER
+              - column:
+                  name: submitted_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: graded_at
+                  type: TIMESTAMP WITH TIME ZONE
+
+        - addUniqueConstraint:
+            tableName: users
+            columnNames: keycloak_sub
+            constraintName: uk_users_keycloak_sub
+
+        - addUniqueConstraint:
+            tableName: users
+            columnNames: username
+            constraintName: uk_users_username
+
+        - addUniqueConstraint:
+            tableName: users
+            columnNames: email
+            constraintName: uk_users_email
+
+        - addUniqueConstraint:
+            tableName: enrollments
+            columnNames: user_id,course_id
+            constraintName: uk_enrollments_user_course
+
+        - addForeignKeyConstraint:
+            baseTableName: courses
+            baseColumnNames: teacher_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_courses_teacher
+            onDelete: RESTRICT
+
+        - addForeignKeyConstraint:
+            baseTableName: enrollments
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_enrollments_user
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: enrollments
+            baseColumnNames: course_id
+            referencedTableName: courses
+            referencedColumnNames: id
+            constraintName: fk_enrollments_course
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: lessons
+            baseColumnNames: course_id
+            referencedTableName: courses
+            referencedColumnNames: id
+            constraintName: fk_lessons_course
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: lectures
+            baseColumnNames: lesson_id
+            referencedTableName: lessons
+            referencedColumnNames: id
+            constraintName: fk_lectures_lesson
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: assessments
+            baseColumnNames: course_id
+            referencedTableName: courses
+            referencedColumnNames: id
+            constraintName: fk_assessments_course
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: assessments
+            baseColumnNames: created_by
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_assessments_teacher
+            onDelete: RESTRICT
+
+        - addForeignKeyConstraint:
+            baseTableName: submissions
+            baseColumnNames: assessment_id
+            referencedTableName: assessments
+            referencedColumnNames: id
+            constraintName: fk_submissions_assessment
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: submissions
+            baseColumnNames: student_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_submissions_student
+            onDelete: CASCADE
+
+        - sql:
+            dbms: postgresql
+            sql: ALTER TABLE users ADD CONSTRAINT ck_users_role CHECK (role IN ('ADMIN','TEACHER','STUDENT'));
+
+        - sql:
+            dbms: postgresql
+            sql: ALTER TABLE submissions ADD CONSTRAINT ck_submissions_score CHECK (score IS NULL OR (score >= 0 AND score <= 100));
+
+        - sql:
+            dbms: postgresql
+            sql: ALTER TABLE lectures ADD CONSTRAINT ck_lectures_content CHECK (video_url IS NOT NULL OR content IS NOT NULL);

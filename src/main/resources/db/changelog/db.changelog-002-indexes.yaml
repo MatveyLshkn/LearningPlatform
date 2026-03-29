@@ -1,0 +1,71 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-indexes
+      author: codex
+      changes:
+        - createIndex:
+            tableName: courses
+            indexName: idx_courses_teacher_id
+            columns:
+              - column:
+                  name: teacher_id
+        - createIndex:
+            tableName: courses
+            indexName: idx_courses_created_at
+            columns:
+              - column:
+                  name: created_at
+        - createIndex:
+            tableName: enrollments
+            indexName: idx_enrollments_user_id
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            tableName: enrollments
+            indexName: idx_enrollments_course_id
+            columns:
+              - column:
+                  name: course_id
+        - createIndex:
+            tableName: lessons
+            indexName: idx_lessons_course_id
+            columns:
+              - column:
+                  name: course_id
+        - createIndex:
+            tableName: lectures
+            indexName: idx_lectures_lesson_id
+            columns:
+              - column:
+                  name: lesson_id
+        - createIndex:
+            tableName: assessments
+            indexName: idx_assessments_course_id
+            columns:
+              - column:
+                  name: course_id
+        - createIndex:
+            tableName: assessments
+            indexName: idx_assessments_created_by
+            columns:
+              - column:
+                  name: created_by
+        - createIndex:
+            tableName: submissions
+            indexName: idx_submissions_assessment_id
+            columns:
+              - column:
+                  name: assessment_id
+        - createIndex:
+            tableName: submissions
+            indexName: idx_submissions_student_id
+            columns:
+              - column:
+                  name: student_id
+        - createIndex:
+            tableName: submissions
+            indexName: idx_submissions_submitted_at
+            columns:
+              - column:
+                  name: submitted_at

@@ -1,0 +1,60 @@
+{
+  "realm": "learning-platform",
+  "enabled": true,
+  "displayName": "Learning Platform",
+  "registrationAllowed": false,
+  "rememberMe": true,
+  "resetPasswordAllowed": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN",
+        "description": "Platform administrator"
+      },
+      {
+        "name": "TEACHER",
+        "description": "Teacher role"
+      },
+      {
+        "name": "STUDENT",
+        "description": "Student role"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "learning-platform-backend",
+      "name": "learning-platform-backend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "secret": "change-me",
+      "fullScopeAllowed": true
+    }
+  ],
+  "users": [
+    {
+      "id": "8f83d1f0-8b39-4b96-9d5d-c39d7ad8f111",
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Platform",
+      "lastName": "Admin",
+      "email": "admin@learning-platform.local",
+      "realmRoles": [
+        "ADMIN"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}
