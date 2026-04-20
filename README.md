@@ -63,7 +63,7 @@ docker compose down
 
 ### 2) Full stack in Docker (optional)
 ```bash
-docker compose --profile fullstack up --build
+docker compose up --build
 ```
 
 ## What Docker Compose Bootstraps
@@ -131,13 +131,61 @@ curl -i -X POST http://localhost:8080/enrollments \
 - Main config file: `src/main/resources/application.yml`
 - No multi-environment application YAMLs are used.
 
-Important environment variables:
-- `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`
-- `KEYCLOAK_ISSUER_URI`
-- `KEYCLOAK_ADMIN_URL`
-- `KEYCLOAK_REALM`
-- `KEYCLOAK_CLIENT_ID`
-- `KEYCLOAK_CLIENT_SECRET`
+### Environment Variables You Must Provide
+
+In current configuration, **all variables below have defaults**.  
+So for local development, you can run without specifying env vars.
+
+You need to set variables only when:
+- using non-default ports/hosts
+- connecting to external Keycloak/Postgres
+- overriding AI provider/model settings
+
+### Minimal required set by run mode
+
+1) Infra in Docker + app locally (`./mvnw spring-boot:run`)
+- Usually required: none
+- If you changed host ports, set:
+  - `DB_URL`
+  - `KEYCLOAK_ISSUER_URI`
+  - `KEYCLOAK_ADMIN_URL`
+
+2) Full stack in Docker (`docker compose up --build`)
+- Usually required: none (compose injects app env vars)
+- Override only if your environment differs from defaults:
+  - `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`
+  - `KEYCLOAK_ISSUER_URI`, `KEYCLOAK_ADMIN_URL`
+  - `KEYCLOAK_REALM`, `KEYCLOAK_CLIENT_ID`, `KEYCLOAK_CLIENT_SECRET`
+
+### Full env var reference (with defaults)
+
+- `SERVER_PORT` (default: `8080`)
+- `DB_URL` (default: `jdbc:postgresql://localhost:5432/learning_platform`)
+- `DB_USERNAME` (default: `learning`)
+- `DB_PASSWORD` (default: `learning`)
+- `KEYCLOAK_ISSUER_URI` (default: `http://localhost:8081/realms/learning-platform`)
+- `KEYCLOAK_ADMIN_URL` (default: `http://localhost:8081`)
+- `KEYCLOAK_REALM` (default: `learning-platform`)
+- `KEYCLOAK_CLIENT_ID` (default: `learning-platform-backend`)
+- `KEYCLOAK_CLIENT_SECRET` (default: `change-me`)
+- `KEYCLOAK_ADMIN_USERNAME` (default: `admin`)
+- `KEYCLOAK_ADMIN_PASSWORD` (default: `admin`)
+- `OLLAMA_BASE_URL` (default: `https://ollama.com`)
+- `OLLAMA_API_KEY` (default value exists in config; override strongly recommended outside local/dev)
+- `OLLAMA_MODEL` (default: `deepseek-v3.2:cloud`)
+- `AI_TEMPERATURE` (default: `0.2`)
+- `AI_MAX_TOKENS` (default: `1200`)
+- `AI_MAX_PROMPT_CHARS` (default: `12000`)
+- `AI_ANALYTICS_RECENT_DAYS` (default: `21`)
+- `AI_TIMEOUT_SECONDS` (default: `20`)
+
+Example override (local app mode):
+```bash
+export DB_URL=jdbc:postgresql://localhost:5433/learning_platform
+export KEYCLOAK_ISSUER_URI=http://localhost:8082/realms/learning-platform
+export KEYCLOAK_ADMIN_URL=http://localhost:8082
+./mvnw spring-boot:run
+```
 
 ## Database and Migrations
 - Liquibase changelogs are under:
@@ -149,7 +197,7 @@ Important environment variables:
   - `GET /actuator/prometheus`
 - Prometheus scrapes:
   - `host.docker.internal:8080` (app running locally)
-  - `app:8080` (app running in Docker fullstack profile)
+  - `app:8080` (app running in Docker Compose)
 - Logs:
   - Docker container logs are collected by Promtail and pushed to Loki.
   - Grafana has two provisioned datasources: `Prometheus` and `Loki`.

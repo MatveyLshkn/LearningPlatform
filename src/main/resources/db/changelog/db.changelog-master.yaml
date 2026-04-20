@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/db.changelog-002-indexes.yaml
   - include:
       file: db/changelog/db.changelog-003-seed-admin.yaml
+  - include:
+      file: db/changelog/db.changelog-004-ai-assessments.yaml

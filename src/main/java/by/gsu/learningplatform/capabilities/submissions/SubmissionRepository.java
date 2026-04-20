@@ -14,4 +14,44 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, UU
 
     @Query("select avg(s.score) from SubmissionEntity s where s.score is not null")
     Double averageScore();
+
+    @Query("""
+            select avg(s.score)
+            from SubmissionEntity s
+            join AssessmentEntity a on a.id = s.assessmentId
+            where a.courseId = :courseId and s.score is not null
+            """)
+    Double averageScoreByCourse(UUID courseId);
+
+    @Query("""
+            select count(s)
+            from SubmissionEntity s
+            join AssessmentEntity a on a.id = s.assessmentId
+            where a.courseId = :courseId and s.score is not null
+            """)
+    long gradedCountByCourse(UUID courseId);
+
+    @Query("""
+            select count(s)
+            from SubmissionEntity s
+            join AssessmentEntity a on a.id = s.assessmentId
+            where a.courseId = :courseId
+            """)
+    long totalCountByCourse(UUID courseId);
+
+    @Query("""
+            select s
+            from SubmissionEntity s
+            join AssessmentEntity a on a.id = s.assessmentId
+            where a.courseId = :courseId
+            """)
+    List<SubmissionEntity> findByCourseId(UUID courseId);
+
+    @Query("""
+            select s
+            from SubmissionEntity s
+            join AssessmentEntity a on a.id = s.assessmentId
+            where a.courseId = :courseId and s.studentId = :studentId
+            """)
+    List<SubmissionEntity> findByCourseIdAndStudentId(UUID courseId, UUID studentId);
 }

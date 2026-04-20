@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-ai-assessment-columns
+      author: codex
+      changes:
+        - addColumn:
+            tableName: assessments
+            columns:
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: questions_json
+                  type: TEXT
+              - column:
+                  name: answer_key_json
+                  type: TEXT
+              - column:
+                  name: rubric_json
+                  type: TEXT
+              - column:
+                  name: source_type
+                  type: VARCHAR(32)
+              - column:
+                  name: source_id
+                  type: UUID

@@ -34,6 +34,8 @@ public class SecurityConfig {
     private static final String tokenPath = "/token";
     private static final String platformStatisticsPath = "/platform-statistics/**";
     private static final String coursesPath = "/courses/**";
+    private static final String courseAiPath = "/courses/*/ai/**";
+    private static final String studyPlanPath = "/courses/*/students/*/ai-study-plan";
     private static final String lessonsPath = "/lessons/**";
     private static final String lecturesPath = "/lectures/**";
     private static final String assessmentsPath = "/assessments/**";
@@ -56,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, coursesPath, lessonsPath, lecturesPath).hasAnyRole(teacherRole, adminRole)
                         .requestMatchers(HttpMethod.POST, enrollmentsPath, submissionsPath).hasAnyRole(studentRole, adminRole)
                         .requestMatchers(HttpMethod.DELETE, enrollmentsPath).hasAnyRole(studentRole, adminRole)
+                        .requestMatchers(HttpMethod.GET, courseAiPath, studyPlanPath).hasAnyRole(teacherRole, adminRole)
                         .requestMatchers(HttpMethod.GET, allPaths).authenticated()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))

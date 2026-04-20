@@ -16,6 +16,8 @@ learning-platform:
     realm: learning-platform
     client-id: learning-platform-backend
     client-secret: change-me
+    admin-username: admin
+    admin-password: admin
   pagination:
     default-limit: 20
     max-limit: 100

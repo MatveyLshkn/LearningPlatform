@@ -29,6 +29,17 @@ public class AssessmentController {
         return assessmentService.create(request);
     }
 
+    @PostMapping("/assessments/generate")
+    public AssessmentDraftResponse generate(@Valid @RequestBody AssessmentGenerateRequest request) {
+        return assessmentService.generateDraft(request);
+    }
+
+    @PostMapping("/assessments/from-draft")
+    @ResponseStatus(HttpStatus.CREATED)
+    public AssessmentResponse createFromDraft(@Valid @RequestBody AssessmentCreateFromDraftRequest request) {
+        return assessmentService.createFromDraft(request);
+    }
+
     @GetMapping("/courses/{courseId}/assessments")
     public List<AssessmentResponse> listByCourse(@PathVariable UUID courseId) {
         return assessmentService.listByCourse(courseId);

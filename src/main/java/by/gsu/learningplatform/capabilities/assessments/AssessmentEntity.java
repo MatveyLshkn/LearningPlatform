@@ -24,6 +24,27 @@ public class AssessmentEntity {
     @Column(name = "created_by", nullable = false)
     private UUID createdBy;
 
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "questions_json")
+    private String questionsJson;
+
+    @Column(name = "answer_key_json")
+    private String answerKeyJson;
+
+    @Column(name = "rubric_json")
+    private String rubricJson;
+
+    @Column(name = "source_type")
+    private String sourceType;
+
+    @Column(name = "source_id")
+    private UUID sourceId;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
@@ -58,5 +79,61 @@ public class AssessmentEntity {
 
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getQuestionsJson() {
+        return questionsJson;
+    }
+
+    public void setQuestionsJson(String questionsJson) {
+        this.questionsJson = questionsJson;
+    }
+
+    public String getAnswerKeyJson() {
+        return answerKeyJson;
+    }
+
+    public void setAnswerKeyJson(String answerKeyJson) {
+        this.answerKeyJson = answerKeyJson;
+    }
+
+    public String getRubricJson() {
+        return rubricJson;
+    }
+
+    public void setRubricJson(String rubricJson) {
+        this.rubricJson = rubricJson;
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public UUID getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(UUID sourceId) {
+        this.sourceId = sourceId;
     }
 }

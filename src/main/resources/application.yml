@@ -26,6 +26,13 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/learning-platform}
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:https://ollama.com}
+      api-key: ${OLLAMA_API_KEY}
+      chat:
+        options:
+          model: ${OLLAMA_MODEL:deepseek-v3.2:cloud}
 
 server:
   port: ${SERVER_PORT:8080}
@@ -65,12 +72,21 @@ learning-platform:
     realm: ${KEYCLOAK_REALM:learning-platform}
     client-id: ${KEYCLOAK_CLIENT_ID:learning-platform-backend}
     client-secret: ${KEYCLOAK_CLIENT_SECRET:change-me}
+    admin-username: ${KEYCLOAK_ADMIN_USERNAME:admin}
+    admin-password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
   pagination:
     default-limit: 20
     max-limit: 100
   liquibase:
     enabled: true
     changeLog: classpath:/db/changelog/db.changelog-master.yaml
+  ai:
+    model: ${OLLAMA_MODEL:deepseek-v3.2:cloud}
+    temperature: ${AI_TEMPERATURE:0.2}
+    max-tokens: ${AI_MAX_TOKENS:1200}
+    max-prompt-chars: ${AI_MAX_PROMPT_CHARS:12000}
+    analytics-recent-days: ${AI_ANALYTICS_RECENT_DAYS:21}
+    timeout-seconds: ${AI_TIMEOUT_SECONDS:20}
 
 logging:
   level:
