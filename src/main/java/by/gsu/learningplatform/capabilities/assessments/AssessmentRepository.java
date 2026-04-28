@@ -9,5 +9,7 @@ public interface AssessmentRepository extends JpaRepository<AssessmentEntity, UU
 
     List<AssessmentEntity> findByCourseId(UUID courseId);
 
+    List<AssessmentEntity> findByCreatedBy(UUID teacherId);
+
     long countByCreatedBy(UUID teacherId);
 }

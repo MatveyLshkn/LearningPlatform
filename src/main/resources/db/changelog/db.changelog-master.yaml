@@ -7,3 +7,7 @@ databaseChangeLog:
       file: db/changelog/db.changelog-003-seed-admin.yaml
   - include:
       file: db/changelog/db.changelog-004-ai-assessments.yaml
+  - include:
+      file: db/changelog/db.changelog-005-course-tags.yaml
+  - include:
+      file: db/changelog/db.changelog-006-course-progress.yaml

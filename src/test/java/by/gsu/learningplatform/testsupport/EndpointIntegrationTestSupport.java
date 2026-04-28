@@ -31,11 +31,14 @@ public abstract class EndpointIntegrationTestSupport {
     protected ObjectMapper objectMapper;
 
     protected void clearAllTables() {
+        jdbcTemplate.update("delete from lecture_progress");
         jdbcTemplate.update("delete from submissions");
         jdbcTemplate.update("delete from assessments");
         jdbcTemplate.update("delete from lectures");
         jdbcTemplate.update("delete from lessons");
         jdbcTemplate.update("delete from enrollments");
+        jdbcTemplate.update("delete from course_tags");
+        jdbcTemplate.update("delete from tags");
         jdbcTemplate.update("delete from courses");
         jdbcTemplate.update("delete from users");
     }
@@ -56,6 +59,62 @@ public abstract class EndpointIntegrationTestSupport {
         return id;
     }
 
+    protected UUID insertLesson(UUID courseId, String title) {
+        final var id = UUID.randomUUID();
+        jdbcTemplate.update(
+                "insert into lessons(id, course_id, title, content) values (?,?,?,?)",
+                id, courseId, title, "seeded lesson content");
+        return id;
+    }
+
+    protected UUID insertLecture(UUID lessonId, String title) {
+        final var id = UUID.randomUUID();
+        jdbcTemplate.update(
+                "insert into lectures(id, lesson_id, title, content) values (?,?,?,?)",
+                id, lessonId, title, "seeded lecture content");
+        return id;
+    }
+
+    protected UUID insertEnrollment(UUID userId, UUID courseId) {
+        final var id = UUID.randomUUID();
+        jdbcTemplate.update(
+                "insert into enrollments(id, user_id, course_id, enrolled_at) values (?,?,?,CURRENT_TIMESTAMP)",
+                id, userId, courseId);
+        return id;
+    }
+
+    protected UUID insertAssessment(UUID courseId, UUID createdBy, String title) {
+        final var id = UUID.randomUUID();
+        jdbcTemplate.update(
+                """
+                        insert into assessments(id, course_id, created_by, title, description, created_at)
+                        values (?,?,?,?,?,CURRENT_TIMESTAMP)
+                        """,
+                id, courseId, createdBy, title, "seeded assessment");
+        return id;
+    }
+
+    protected UUID insertSubmission(UUID assessmentId, UUID studentId, int score) {
+        final var id = UUID.randomUUID();
+        jdbcTemplate.update(
+                """
+                        insert into submissions(id, assessment_id, student_id, answer_text, score, submitted_at, graded_at)
+                        values (?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+                        """,
+                id, assessmentId, studentId, "seeded answer", score);
+        return id;
+    }
+
+    protected UUID insertTag(String name) {
+        final var id = UUID.randomUUID();
+        jdbcTemplate.update("insert into tags(id, name) values (?,?)", id, name);
+        return id;
+    }
+
+    protected void insertCourseTag(UUID courseId, UUID tagId) {
+        jdbcTemplate.update("insert into course_tags(course_id, tag_id) values (?,?)", courseId, tagId);
+    }
+
     protected ApiResult get(String path, String token) {
         return request(path, HttpMethod.GET, null, token);
     }
@@ -66,6 +125,10 @@ public abstract class EndpointIntegrationTestSupport {
 
     protected ApiResult patch(String path, String body, String token) {
         return request(path, HttpMethod.PATCH, body, token);
+    }
+
+    protected ApiResult put(String path, String body, String token) {
+        return request(path, HttpMethod.PUT, body, token);
     }
 
     protected JsonNode json(String body) throws IOException {
@@ -95,6 +158,14 @@ public abstract class EndpointIntegrationTestSupport {
         }
         if (HttpMethod.PATCH.equals(method)) {
             return client.patch()
+                    .uri(url)
+                    .headers(headers -> addBearer(headers, token))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body == null ? "" : body)
+                    .exchange((request, response) -> toResult(response));
+        }
+        if (HttpMethod.PUT.equals(method)) {
+            return client.put()
                     .uri(url)
                     .headers(headers -> addBearer(headers, token))
                     .contentType(MediaType.APPLICATION_JSON)

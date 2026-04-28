@@ -1,0 +1,80 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-course-tags
+      author: codex
+      changes:
+        - createTable:
+            tableName: tags
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: course_tags
+            columns:
+              - column:
+                  name: course_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tag_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: tags
+            columnNames: name
+            constraintName: uk_tags_name
+
+        - addUniqueConstraint:
+            tableName: course_tags
+            columnNames: course_id,tag_id
+            constraintName: uk_course_tags_course_tag
+
+        - addForeignKeyConstraint:
+            baseTableName: course_tags
+            baseColumnNames: course_id
+            referencedTableName: courses
+            referencedColumnNames: id
+            constraintName: fk_course_tags_course
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: course_tags
+            baseColumnNames: tag_id
+            referencedTableName: tags
+            referencedColumnNames: id
+            constraintName: fk_course_tags_tag
+            onDelete: CASCADE
+
+        - createIndex:
+            tableName: tags
+            indexName: idx_tags_name
+            columns:
+              - column:
+                  name: name
+
+        - createIndex:
+            tableName: course_tags
+            indexName: idx_course_tags_tag_id
+            columns:
+              - column:
+                  name: tag_id
+
+        - createIndex:
+            tableName: course_tags
+            indexName: idx_course_tags_course_id
+            columns:
+              - column:
+                  name: course_id

@@ -4,6 +4,8 @@ Production-oriented monolithic backend for a learning platform with Keycloak-bas
 
 ## What This Application Does
 - Manages users, courses, lessons, lectures, enrollments, assessments, and submissions.
+- Supports tag-based course discovery.
+- Tracks per-user course progress from completed lectures.
 - Supports role-based behavior:
   - `ADMIN`
   - `TEACHER`
@@ -100,25 +102,38 @@ curl -i -X POST http://localhost:8080/user-registrations \
   -d '{"username":"teacher1","email":"teacher1@example.com","password":"TeacherPass123!","role":"TEACHER"}'
 ```
 
-### 2) Get teacher token from Keycloak
+### 2) Get teacher token
 ```bash
 curl -s -X POST \
-  http://localhost:8081/realms/learning-platform/protocol/openid-connect/token \
+  http://localhost:8080/token \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=password&client_id=learning-platform-backend&client_secret=change-me&username=teacher1&password=TeacherPass123!" 
+  -d "username=teacher1&password=TeacherPass123!"
 ```
 
-Copy `access_token` from the response.
+Copy `accessToken` from the response.
 
 ### 3) Create a course as teacher
 ```bash
 curl -i -X POST http://localhost:8080/courses \
   -H "Authorization: Bearer <teacher_access_token>" \
   -H "Content-Type: application/json" \
-  -d '{"title":"Java Architecture","description":"Advanced backend course"}'
+  -d '{"title":"Java Architecture","description":"Advanced backend course","tags":["java","architecture"]}'
 ```
 
-### 4) Register a student and enroll
+### 4) Filter courses by tag
+```bash
+curl -i "http://localhost:8080/courses?tag=java" \
+  -H "Authorization: Bearer <access_token>"
+```
+
+### 5) List courses created by current teacher
+Use this endpoint for teacher dashboards. The backend resolves the current user from the JWT subject and filters by the local database user id, so the client does not need to compare JWT ids with `teacherId`.
+```bash
+curl -i "http://localhost:8080/courses/me" \
+  -H "Authorization: Bearer <teacher_access_token>"
+```
+
+### 6) Register a student and enroll
 Repeat registration/token flow for a student (`role":"STUDENT"`), then:
 ```bash
 curl -i -X POST http://localhost:8080/enrollments \
@@ -126,6 +141,54 @@ curl -i -X POST http://localhost:8080/enrollments \
   -H "Content-Type: application/json" \
   -d '{"courseId":"<course_id>"}'
 ```
+
+### 7) Admin user directory
+```bash
+curl -i "http://localhost:8080/users?role=STUDENT&limit=20" \
+  -H "Authorization: Bearer <admin_access_token>"
+```
+
+```bash
+curl -i "http://localhost:8080/users/<user_id>/details" \
+  -H "Authorization: Bearer <admin_access_token>"
+```
+
+### 8) View own profile
+Any authenticated user can fetch their own basic profile:
+```bash
+curl -i "http://localhost:8080/users/<own_user_id>" \
+  -H "Authorization: Bearer <access_token>"
+```
+
+Only admins can fetch another user's profile or use the full learning details endpoint.
+
+### 9) Track course progress
+Progress is based on completed lectures in a course.
+
+View your own progress:
+```bash
+curl -i "http://localhost:8080/courses/<course_id>/progress/me" \
+  -H "Authorization: Bearer <access_token>"
+```
+
+Mark a lecture completed for a user:
+```bash
+curl -i -X PUT "http://localhost:8080/courses/<course_id>/users/<user_id>/progress/lectures/<lecture_id>" \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"completed":true}'
+```
+
+View a specific user's course progress:
+```bash
+curl -i "http://localhost:8080/courses/<course_id>/users/<user_id>/progress" \
+  -H "Authorization: Bearer <access_token>"
+```
+
+Access rules:
+- students can view/update their own progress
+- course owner teachers and admins can view/update progress for users in that course
+- unrelated users/teachers receive `403`
 
 ## Configuration
 - Main config file: `src/main/resources/application.yml`

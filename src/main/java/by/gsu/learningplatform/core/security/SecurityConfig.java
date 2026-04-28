@@ -32,6 +32,7 @@ public class SecurityConfig {
     private static final String openapiPath = "/openapi/**";
     private static final String registrationsPath = "/user-registrations";
     private static final String tokenPath = "/token";
+    private static final String usersPath = "/users";
     private static final String platformStatisticsPath = "/platform-statistics/**";
     private static final String coursesPath = "/courses/**";
     private static final String courseAiPath = "/courses/*/ai/**";
@@ -52,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers(healthPath, infoPath, prometheusPath).permitAll()
                         .requestMatchers(swaggerPath, swaggerWildcardPath, openapiPath).permitAll()
                         .requestMatchers(HttpMethod.POST, registrationsPath, tokenPath).permitAll()
+                        .requestMatchers(HttpMethod.GET, usersPath).hasRole(adminRole)
                         .requestMatchers(platformStatisticsPath).hasRole(adminRole)
                         .requestMatchers(HttpMethod.POST, coursesPath, lessonsPath, lecturesPath, assessmentsPath).hasAnyRole(teacherRole, adminRole)
                         .requestMatchers(HttpMethod.PATCH, coursesPath, submissionsPath).hasAnyRole(teacherRole, adminRole)

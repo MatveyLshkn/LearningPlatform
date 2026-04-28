@@ -50,6 +50,7 @@ services:
       KEYCLOAK_REALM: learning-platform
       KEYCLOAK_CLIENT_ID: learning-platform-backend
       KEYCLOAK_CLIENT_SECRET: change-me
+      SERVER_PORT: 8080
     ports:
       - "8080:8080"
     depends_on:

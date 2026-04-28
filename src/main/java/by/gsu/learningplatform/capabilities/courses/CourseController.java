@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -40,13 +41,25 @@ public class CourseController {
 
     @GetMapping
     public CursorPageResponse<CourseResponse> list(@RequestParam(required = false) Integer limit,
-                                                   @RequestParam(required = false) String cursor) {
+                                                   @RequestParam(required = false) String cursor,
+                                                   @RequestParam(name = "tag", required = false) List<String> tags) {
         final var pageable = paginationUtils.toPageable(limit);
-        final var page = courseService.findAll(pageable);
+        final var page = courseService.findAll(pageable, tags);
         return new CursorPageResponse<>(
                 page.getContent(),
                 new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), cursor),
                 Map.of("self", "/courses"));
+    }
+
+    @GetMapping("/me")
+    public CursorPageResponse<CourseResponse> listOwn(@RequestParam(required = false) Integer limit,
+                                                      @RequestParam(required = false) String cursor) {
+        final var pageable = paginationUtils.toPageable(limit);
+        final var page = courseService.findOwn(pageable);
+        return new CursorPageResponse<>(
+                page.getContent(),
+                new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), cursor),
+                Map.of("self", "/courses/me"));
     }
 
     @PatchMapping("/{courseId}")

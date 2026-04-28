@@ -4,9 +4,14 @@ import by.gsu.learningplatform.core.persistence.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -25,6 +30,13 @@ public class CourseEntity extends AuditableEntity {
 
     @Column(name = "teacher_id", nullable = false)
     private UUID teacherId;
+
+    @ManyToMany
+    @JoinTable(
+            name = "course_tags",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private Set<TagEntity> tags = new HashSet<>();
 
     public UUID getId() {
         return id;
@@ -56,5 +68,13 @@ public class CourseEntity extends AuditableEntity {
 
     public void setTeacherId(UUID teacherId) {
         this.teacherId = teacherId;
+    }
+
+    public Set<TagEntity> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<TagEntity> tags) {
+        this.tags = tags;
     }
 }

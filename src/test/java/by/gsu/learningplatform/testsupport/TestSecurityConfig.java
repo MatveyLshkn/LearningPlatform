@@ -17,6 +17,7 @@ public class TestSecurityConfig {
     private static final String claimRoles = "roles";
     private static final String adminToken = "admin-token";
     private static final String teacherToken = "teacher-token";
+    private static final String otherTeacherToken = "other-teacher-token";
     private static final String studentToken = "student-token";
 
     @Bean
@@ -38,6 +39,7 @@ public class TestSecurityConfig {
         return switch (token) {
             case adminToken -> new TokenProfile("admin-sub", "admin-user", List.of("ADMIN"));
             case teacherToken -> new TokenProfile("teacher-sub", "teacher-user", List.of("TEACHER"));
+            case otherTeacherToken -> new TokenProfile("other-teacher-sub", "other-teacher", List.of("TEACHER"));
             case studentToken -> new TokenProfile("student-sub", "student-user", List.of("STUDENT"));
             default -> new TokenProfile("unknown-sub", "unknown-user", List.of());
         };

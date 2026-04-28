@@ -1,0 +1,65 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-course-progress
+      author: codex
+      changes:
+        - createTable:
+            tableName: lecture_progress
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: lecture_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: completed_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: lecture_progress
+            columnNames: user_id,lecture_id
+            constraintName: uk_lecture_progress_user_lecture
+
+        - addForeignKeyConstraint:
+            baseTableName: lecture_progress
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_lecture_progress_user
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: lecture_progress
+            baseColumnNames: lecture_id
+            referencedTableName: lectures
+            referencedColumnNames: id
+            constraintName: fk_lecture_progress_lecture
+            onDelete: CASCADE
+
+        - createIndex:
+            tableName: lecture_progress
+            indexName: idx_lecture_progress_user_id
+            columns:
+              - column:
+                  name: user_id
+
+        - createIndex:
+            tableName: lecture_progress
+            indexName: idx_lecture_progress_lecture_id
+            columns:
+              - column:
+                  name: lecture_id
