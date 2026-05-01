@@ -2,6 +2,9 @@ package by.gsu.learningplatform.capabilities.enrollments;
 
 import by.gsu.learningplatform.capabilities.courses.CourseService;
 import by.gsu.learningplatform.capabilities.users.UserEntity;
+import by.gsu.learningplatform.capabilities.users.UserMapper;
+import by.gsu.learningplatform.capabilities.users.UserRepository;
+import by.gsu.learningplatform.capabilities.users.UserResponse;
 import by.gsu.learningplatform.capabilities.users.UserRole;
 import by.gsu.learningplatform.capabilities.users.UserService;
 import by.gsu.learningplatform.core.error.ConflictException;
@@ -9,17 +12,25 @@ import by.gsu.learningplatform.core.error.ForbiddenException;
 import by.gsu.learningplatform.core.error.NotFoundException;
 import by.gsu.learningplatform.core.observability.BusinessMetrics;
 import by.gsu.learningplatform.core.security.AuthFacade;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class EnrollmentService {
 
     private final EnrollmentRepository enrollmentRepository;
     private final EnrollmentMapper enrollmentMapper;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final UserService userService;
     private final CourseService courseService;
     private final AuthFacade authFacade;
@@ -27,12 +38,16 @@ public class EnrollmentService {
 
     public EnrollmentService(EnrollmentRepository enrollmentRepository,
                              EnrollmentMapper enrollmentMapper,
+                             UserRepository userRepository,
+                             UserMapper userMapper,
                              UserService userService,
                              CourseService courseService,
                              AuthFacade authFacade,
                              BusinessMetrics businessMetrics) {
         this.enrollmentRepository = enrollmentRepository;
         this.enrollmentMapper = enrollmentMapper;
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
         this.userService = userService;
         this.courseService = courseService;
         this.authFacade = authFacade;
@@ -76,8 +91,32 @@ public class EnrollmentService {
     }
 
     @Transactional(readOnly = true)
-    public List<EnrollmentResponse> listOwn() {
+    public Page<EnrollmentResponse> listOwn(Pageable pageable) {
         final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
-        return enrollmentRepository.findByUserId(actor.getId()).stream().map(enrollmentMapper::toResponse).toList();
+        return enrollmentRepository.findByUserId(actor.getId(), pageable).map(enrollmentMapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserResponse> listCourseStudents(UUID courseId, Pageable pageable) {
+        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        final var course = courseService.getEntity(courseId);
+        final var canReadRoster = actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId());
+        if (!canReadRoster) {
+            throw new ForbiddenException("Only course teacher or admin can view course students");
+        }
+
+        final var enrollmentPage = enrollmentRepository.findByCourseId(courseId, pageable);
+        final var studentIds = enrollmentPage.stream().map(EnrollmentEntity::getUserId).toList();
+        if (studentIds.isEmpty()) {
+            return Page.empty(pageable);
+        }
+        final Map<UUID, UserEntity> studentsById = userRepository.findByIdInAndRole(studentIds, UserRole.STUDENT).stream()
+                .collect(Collectors.toMap(UserEntity::getId, Function.identity()));
+        final var students = enrollmentPage.stream()
+                .map(enrollment -> studentsById.get(enrollment.getUserId()))
+                .filter(java.util.Objects::nonNull)
+                .map(userMapper::toResponse)
+                .toList();
+        return new PageImpl<>(students, pageable, enrollmentPage.getTotalElements());
     }
 }

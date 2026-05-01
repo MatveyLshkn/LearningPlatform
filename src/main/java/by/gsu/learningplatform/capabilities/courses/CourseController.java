@@ -3,8 +3,6 @@ package by.gsu.learningplatform.capabilities.courses;
 import by.gsu.learningplatform.core.web.CursorPageResponse;
 import by.gsu.learningplatform.core.web.PaginationUtils;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,23 +41,40 @@ public class CourseController {
     public CursorPageResponse<CourseResponse> list(@RequestParam(required = false) Integer limit,
                                                    @RequestParam(required = false) String cursor,
                                                    @RequestParam(name = "tag", required = false) List<String> tags) {
-        final var pageable = paginationUtils.toPageable(limit);
+        final var pageable = paginationUtils.toPageable(limit, cursor);
         final var page = courseService.findAll(pageable, tags);
+        final var tagsParam = tags == null || tags.isEmpty() ? "" : tags.stream().map(tag -> "&tag=" + tag).reduce("", String::concat);
         return new CursorPageResponse<>(
                 page.getContent(),
-                new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), cursor),
-                Map.of("self", "/courses"));
+                new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), paginationUtils.nextCursor(page)),
+                Map.of("self", "/courses?limit=" + pageable.getPageSize() + "&cursor=" + page.getNumber() + tagsParam));
+    }
+
+    @GetMapping("/{courseId}")
+    public CourseCatalogDetailsResponse getCatalogDetails(@PathVariable UUID courseId) {
+        return courseService.getCatalogDetails(courseId);
+    }
+
+    @GetMapping("/enrolled/me")
+    public CursorPageResponse<CourseEnrollmentResponse> listEnrolled(@RequestParam(required = false) Integer limit,
+                                                                     @RequestParam(required = false) String cursor) {
+        final var pageable = paginationUtils.toPageable(limit, cursor);
+        final var page = courseService.findEnrolledWithEnrollment(pageable);
+        return new CursorPageResponse<>(
+                page.getContent(),
+                new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), paginationUtils.nextCursor(page)),
+                Map.of("self", "/courses/enrolled/me?limit=" + pageable.getPageSize() + "&cursor=" + page.getNumber()));
     }
 
     @GetMapping("/me")
     public CursorPageResponse<CourseResponse> listOwn(@RequestParam(required = false) Integer limit,
                                                       @RequestParam(required = false) String cursor) {
-        final var pageable = paginationUtils.toPageable(limit);
+        final var pageable = paginationUtils.toPageable(limit, cursor);
         final var page = courseService.findOwn(pageable);
         return new CursorPageResponse<>(
                 page.getContent(),
-                new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), cursor),
-                Map.of("self", "/courses/me"));
+                new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), paginationUtils.nextCursor(page)),
+                Map.of("self", "/courses/me?limit=" + pageable.getPageSize() + "&cursor=" + page.getNumber()));
     }
 
     @PatchMapping("/{courseId}")

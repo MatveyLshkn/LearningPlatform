@@ -73,6 +73,11 @@ public class UserService {
         return userMapper.toResponse(getById(id));
     }
 
+    public UserResponse getCurrentUserResponse() {
+        final var actor = getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        return userMapper.toResponse(actor);
+    }
+
     public UserResponse getVisibleUserResponse(UUID id) {
         final var actor = getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
         if (actor.getRole() != UserRole.ADMIN && !actor.getId().equals(id)) {

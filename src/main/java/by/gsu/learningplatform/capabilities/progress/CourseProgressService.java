@@ -114,17 +114,20 @@ public class CourseProgressService {
     }
 
     private void validateCanRead(UserEntity actor, CourseEntity course, UserEntity user) {
-        if (actor.getRole() == UserRole.ADMIN || actor.getId().equals(user.getId()) || actor.getId().equals(course.getTeacherId())) {
+        if (actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId())) {
+            return;
+        }
+        if (actor.getRole() == UserRole.STUDENT && actor.getId().equals(user.getId())) {
             return;
         }
         throw new ForbiddenException("You cannot view this user's course progress");
     }
 
     private void validateCanWrite(UserEntity actor, CourseEntity course, UserEntity user) {
-        if (actor.getRole() == UserRole.ADMIN || actor.getId().equals(user.getId()) || actor.getId().equals(course.getTeacherId())) {
+        if (actor.getRole() == UserRole.STUDENT && actor.getId().equals(user.getId())) {
             return;
         }
-        throw new ForbiddenException("You cannot update this user's course progress");
+        throw new ForbiddenException("Only students can update their own course progress");
     }
 
     private void validateLectureBelongsToCourse(UUID courseId, UUID lectureId) {

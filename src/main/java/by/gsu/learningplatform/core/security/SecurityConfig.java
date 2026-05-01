@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -34,6 +35,8 @@ public class SecurityConfig {
     private static final String tokenPath = "/token";
     private static final String usersPath = "/users";
     private static final String platformStatisticsPath = "/platform-statistics/**";
+    private static final String coursesRootPath = "/courses";
+    private static final String courseIdRegex = "^/courses/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
     private static final String coursesPath = "/courses/**";
     private static final String courseAiPath = "/courses/*/ai/**";
     private static final String studyPlanPath = "/courses/*/students/*/ai-study-plan";
@@ -53,11 +56,13 @@ public class SecurityConfig {
                         .requestMatchers(healthPath, infoPath, prometheusPath).permitAll()
                         .requestMatchers(swaggerPath, swaggerWildcardPath, openapiPath).permitAll()
                         .requestMatchers(HttpMethod.POST, registrationsPath, tokenPath).permitAll()
+                        .requestMatchers(HttpMethod.GET, coursesRootPath).permitAll()
+                        .requestMatchers(new RegexRequestMatcher(courseIdRegex, HttpMethod.GET.name())).permitAll()
                         .requestMatchers(HttpMethod.GET, usersPath).hasRole(adminRole)
                         .requestMatchers(platformStatisticsPath).hasRole(adminRole)
                         .requestMatchers(HttpMethod.POST, coursesPath, lessonsPath, lecturesPath, assessmentsPath).hasAnyRole(teacherRole, adminRole)
-                        .requestMatchers(HttpMethod.PATCH, coursesPath, submissionsPath).hasAnyRole(teacherRole, adminRole)
-                        .requestMatchers(HttpMethod.DELETE, coursesPath, lessonsPath, lecturesPath).hasAnyRole(teacherRole, adminRole)
+                        .requestMatchers(HttpMethod.PATCH, coursesPath, lessonsPath, lecturesPath, assessmentsPath, submissionsPath).hasAnyRole(teacherRole, adminRole)
+                        .requestMatchers(HttpMethod.DELETE, coursesPath, lessonsPath, lecturesPath, assessmentsPath).hasAnyRole(teacherRole, adminRole)
                         .requestMatchers(HttpMethod.POST, enrollmentsPath, submissionsPath).hasAnyRole(studentRole, adminRole)
                         .requestMatchers(HttpMethod.DELETE, enrollmentsPath).hasAnyRole(studentRole, adminRole)
                         .requestMatchers(HttpMethod.GET, courseAiPath, studyPlanPath).hasAnyRole(teacherRole, adminRole)

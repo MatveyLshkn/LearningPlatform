@@ -29,12 +29,17 @@ public class UserController {
     public CursorPageResponse<UserResponse> listUsers(@RequestParam(required = false) Integer limit,
                                                       @RequestParam(required = false) String cursor,
                                                       @RequestParam(required = false) UserRole role) {
-        final var pageable = paginationUtils.toPageable(limit);
+        final var pageable = paginationUtils.toPageable(limit, cursor);
         final var page = userService.listUsers(role, pageable);
         return new CursorPageResponse<>(
                 page.getContent(),
-                new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), cursor),
-                Map.of("self", "/users"));
+                new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), paginationUtils.nextCursor(page)),
+                Map.of("self", "/users?limit=" + pageable.getPageSize() + "&cursor=" + page.getNumber() + (role == null ? "" : "&role=" + role.name())));
+    }
+
+    @GetMapping("/me")
+    public UserResponse getCurrentUser() {
+        return userService.getCurrentUserResponse();
     }
 
     @GetMapping("/{userId}")

@@ -50,12 +50,18 @@ class CourseProgressIntegrationTest extends EndpointIntegrationTestSupport {
     }
 
     @Test
-    void shouldAllowCourseTeacherToReadAndUpdateStudentProgress() {
-        final var update = put(progressLecturePath(studentId, lectureId), "{\"completed\":true}", teacherToken);
-        assertEquals(200, update.statusCode());
+    void shouldAllowCourseTeacherToReadStudentProgress() {
+        final var studentUpdate = put(progressLecturePath(studentId, lectureId), "{\"completed\":true}", studentToken);
+        assertEquals(200, studentUpdate.statusCode());
 
         final var read = get("/courses/" + courseId + "/users/" + studentId + "/progress", teacherToken);
         assertEquals(200, read.statusCode());
+    }
+
+    @Test
+    void shouldForbidCourseTeacherWhenUpdatingStudentProgress() {
+        final var update = put(progressLecturePath(studentId, lectureId), "{\"completed\":true}", teacherToken);
+        assertEquals(403, update.statusCode());
     }
 
     @Test

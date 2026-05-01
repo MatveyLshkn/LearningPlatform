@@ -2,6 +2,7 @@ package by.gsu.learningplatform.capabilities.ai;
 
 import by.gsu.learningplatform.capabilities.courses.CourseEntity;
 import by.gsu.learningplatform.capabilities.courses.CourseService;
+import by.gsu.learningplatform.capabilities.enrollments.EnrollmentRepository;
 import by.gsu.learningplatform.capabilities.lectures.LectureRepository;
 import by.gsu.learningplatform.capabilities.lessons.LessonRepository;
 import by.gsu.learningplatform.capabilities.submissions.SubmissionEntity;
@@ -28,6 +29,7 @@ public class AiInsightsService {
 
     private final CourseService courseService;
     private final UserService userService;
+    private final EnrollmentRepository enrollmentRepository;
     private final SubmissionRepository submissionRepository;
     private final LessonRepository lessonRepository;
     private final LectureRepository lectureRepository;
@@ -39,6 +41,7 @@ public class AiInsightsService {
 
     public AiInsightsService(CourseService courseService,
                              UserService userService,
+                             EnrollmentRepository enrollmentRepository,
                              SubmissionRepository submissionRepository,
                              LessonRepository lessonRepository,
                              LectureRepository lectureRepository,
@@ -49,6 +52,7 @@ public class AiInsightsService {
                              LearningPlatformProperties learningPlatformProperties) {
         this.courseService = courseService;
         this.userService = userService;
+        this.enrollmentRepository = enrollmentRepository;
         this.submissionRepository = submissionRepository;
         this.lessonRepository = lessonRepository;
         this.lectureRepository = lectureRepository;
@@ -67,9 +71,14 @@ public class AiInsightsService {
 
         final var submissions = submissionRepository.findByCourseId(courseId);
         final var grouped = groupByStudent(submissions);
+        final var enrolledStudentIds = enrollmentRepository.findByCourseId(courseId).stream()
+                .map(enrollment -> enrollment.getUserId())
+                .distinct()
+                .filter(userId -> userService.getById(userId).getRole() == UserRole.STUDENT)
+                .toList();
 
-        final var studentSummaries = grouped.entrySet().stream()
-                .map(entry -> toStudentSummary(entry.getKey(), entry.getValue()))
+        final var studentSummaries = enrolledStudentIds.stream()
+                .map(studentId -> toStudentSummary(studentId, grouped.getOrDefault(studentId, List.of())))
                 .sorted(Comparator.comparing(StudentSummary::studentId))
                 .toList();
 
@@ -135,7 +144,10 @@ public class AiInsightsService {
         final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
         final var course = courseService.getEntity(courseId);
         validateTeacherOrAdminAccess(actor, course);
-        userService.getById(studentId);
+        final var student = userService.getById(studentId);
+        if (student.getRole() != UserRole.STUDENT || !enrollmentRepository.existsByUserIdAndCourseId(studentId, courseId)) {
+            throw new ForbiddenException("Study plan can be generated only for enrolled students");
+        }
 
         final var studentSubmissions = submissionRepository.findByCourseIdAndStudentId(courseId, studentId);
         final var studentSummary = toStudentSummary(studentId, studentSubmissions);

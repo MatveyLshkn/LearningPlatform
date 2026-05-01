@@ -2,6 +2,7 @@ package by.gsu.learningplatform.capabilities.submissions;
 
 import by.gsu.learningplatform.capabilities.assessments.AssessmentService;
 import by.gsu.learningplatform.capabilities.courses.CourseService;
+import by.gsu.learningplatform.capabilities.enrollments.EnrollmentRepository;
 import by.gsu.learningplatform.capabilities.users.UserEntity;
 import by.gsu.learningplatform.capabilities.users.UserRole;
 import by.gsu.learningplatform.capabilities.users.UserService;
@@ -32,6 +33,8 @@ class SubmissionServiceUnitTest {
     private AssessmentService assessmentService;
     @Mock
     private CourseService courseService;
+    @Mock
+    private EnrollmentRepository enrollmentRepository;
     @Mock
     private UserService userService;
     @Mock

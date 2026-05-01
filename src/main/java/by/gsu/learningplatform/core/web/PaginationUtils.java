@@ -1,6 +1,8 @@
 package by.gsu.learningplatform.core.web;
 
 import by.gsu.learningplatform.core.config.LearningPlatformProperties;
+import by.gsu.learningplatform.core.error.BadRequestException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -15,8 +17,34 @@ public class PaginationUtils {
     }
 
     public Pageable toPageable(Integer limit) {
+        return toPageable(limit, null);
+    }
+
+    public Pageable toPageable(Integer limit, String cursor) {
         var effectiveLimit = limit == null ? paginationProperties.defaultLimit() : limit;
+        if (effectiveLimit <= 0) {
+            throw new BadRequestException("Limit must be greater than zero");
+        }
         effectiveLimit = Math.min(effectiveLimit, paginationProperties.maxLimit());
-        return PageRequest.of(0, effectiveLimit);
+        return PageRequest.of(toPage(cursor), effectiveLimit);
+    }
+
+    public String nextCursor(Page<?> page) {
+        return page.hasNext() ? String.valueOf(page.getNumber() + 1) : null;
+    }
+
+    private int toPage(String cursor) {
+        if (cursor == null || cursor.isBlank()) {
+            return 0;
+        }
+        try {
+            final var page = Integer.parseInt(cursor);
+            if (page < 0) {
+                throw new BadRequestException("Cursor must not be negative");
+            }
+            return page;
+        } catch (NumberFormatException ex) {
+            throw new BadRequestException("Cursor must be a page number");
+        }
     }
 }
