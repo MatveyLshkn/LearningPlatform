@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.core.config;
 
+import lombok.val;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.info.Contact;
@@ -13,20 +14,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
-    private static final String bearerAuthScheme = "bearerAuth";
+    private static final String BEARER_AUTH_SCHEME = "bearerAuth";
 
     @Bean
     public OpenAPI learningPlatformOpenApi() {
-        final var bearerScheme = new SecurityScheme()
-                .name(bearerAuthScheme)
+        val bearerScheme = new SecurityScheme()
+                .name(BEARER_AUTH_SCHEME)
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
                 .bearerFormat("JWT")
                 .in(SecurityScheme.In.HEADER);
 
         return new OpenAPI()
-                .components(new Components().addSecuritySchemes(bearerAuthScheme, bearerScheme))
-                .addSecurityItem(new SecurityRequirement().addList(bearerAuthScheme))
+                .components(new Components().addSecuritySchemes(BEARER_AUTH_SCHEME, bearerScheme))
+                .addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH_SCHEME))
                 .info(new Info()
                         .title("Learning Platform API")
                         .description("Production backend API for the learning platform")

@@ -12,13 +12,13 @@ public class UserRegistrationController {
 
     private final UserRegistrationService userRegistrationService;
 
-    public UserRegistrationController(UserRegistrationService userRegistrationService) {
+    public UserRegistrationController(final UserRegistrationService userRegistrationService) {
         this.userRegistrationService = userRegistrationService;
     }
 
     @PostMapping("/user-registrations")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserRegistrationResponse register(@Valid @RequestBody UserRegistrationRequest request) {
+    public UserRegistrationResponse register( @Valid @RequestBody final UserRegistrationRequest request) {
         return userRegistrationService.register(request);
     }
 }

@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.core.web;
 
+import lombok.val;
 import by.gsu.learningplatform.core.config.LearningPlatformProperties;
 import by.gsu.learningplatform.core.error.BadRequestException;
 import org.springframework.data.domain.Page;
@@ -12,15 +13,15 @@ public class PaginationUtils {
 
     private final LearningPlatformProperties.PaginationProperties paginationProperties;
 
-    public PaginationUtils(LearningPlatformProperties properties) {
+    public PaginationUtils(final LearningPlatformProperties properties) {
         this.paginationProperties = properties.pagination();
     }
 
-    public Pageable toPageable(Integer limit) {
+    public Pageable toPageable(final Integer limit) {
         return toPageable(limit, null);
     }
 
-    public Pageable toPageable(Integer limit, String cursor) {
+    public Pageable toPageable(final Integer limit, final String cursor) {
         var effectiveLimit = limit == null ? paginationProperties.defaultLimit() : limit;
         if (effectiveLimit <= 0) {
             throw new BadRequestException("Limit must be greater than zero");
@@ -29,16 +30,16 @@ public class PaginationUtils {
         return PageRequest.of(toPage(cursor), effectiveLimit);
     }
 
-    public String nextCursor(Page<?> page) {
+    public String nextCursor(final Page<?> page) {
         return page.hasNext() ? String.valueOf(page.getNumber() + 1) : null;
     }
 
-    private int toPage(String cursor) {
+    private int toPage(final String cursor) {
         if (cursor == null || cursor.isBlank()) {
             return 0;
         }
         try {
-            final var page = Integer.parseInt(cursor);
+            val page = Integer.parseInt(cursor);
             if (page < 0) {
                 throw new BadRequestException("Cursor must not be negative");
             }

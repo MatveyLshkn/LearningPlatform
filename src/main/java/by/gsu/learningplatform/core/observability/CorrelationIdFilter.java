@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.core.observability;
 
+import lombok.val;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,17 +16,17 @@ import java.util.UUID;
 @Component
 public class CorrelationIdFilter extends OncePerRequestFilter {
 
-    public static final String correlationIdHeader = "X-Flow-ID";
+    public static final String CORRELATION_ID_HEADER = "X-Flow-ID";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        final var correlationId = Optional.ofNullable(request.getHeader(correlationIdHeader))
+        val correlationId = Optional.ofNullable(request.getHeader(CORRELATION_ID_HEADER))
                 .filter(value -> !value.isBlank())
                 .orElse(UUID.randomUUID().toString());
 
         MDC.put("correlationId", correlationId);
-        response.setHeader(correlationIdHeader, correlationId);
+        response.setHeader(CORRELATION_ID_HEADER, correlationId);
 
         try {
             filterChain.doFilter(request, response);

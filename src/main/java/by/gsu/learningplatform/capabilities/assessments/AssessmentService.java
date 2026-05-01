@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.assessments;
 
+import lombok.val;
 import by.gsu.learningplatform.capabilities.ai.AiAssessmentDraftPayload;
 import by.gsu.learningplatform.capabilities.ai.AiClientService;
 import by.gsu.learningplatform.capabilities.ai.AiIntegrationException;
@@ -76,9 +77,9 @@ public class AssessmentService {
     }
 
     @Transactional
-    public AssessmentResponse create(AssessmentCreateRequest request) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
-        final var course = courseService.getEntity(request.courseId());
+    public AssessmentResponse create(final AssessmentCreateRequest request) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val course = courseService.getEntity(request.courseId());
 
         validateTeacherOrAdminAccess(actor, course);
         if (request.lessonId() != null && request.lectureId() != null) {
@@ -86,7 +87,7 @@ public class AssessmentService {
         }
         validateAssessmentPayload(request.questions(), request.answerKey(), request.rubricCriteria());
 
-        final var entity = new AssessmentEntity();
+        val entity = new AssessmentEntity();
         entity.setCourseId(request.courseId());
         entity.setCreatedBy(actor.getId());
         entity.setTitle(request.title());
@@ -100,19 +101,19 @@ public class AssessmentService {
     }
 
     @Transactional(readOnly = true)
-    public AssessmentDraftResponse generateDraft(AssessmentGenerateRequest request) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
-        final var course = courseService.getEntity(request.courseId());
+    public AssessmentDraftResponse generateDraft(final AssessmentGenerateRequest request) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val course = courseService.getEntity(request.courseId());
         validateTeacherOrAdminAccess(actor, course);
         validateSourceScope(request);
 
-        final var source = buildSourceMaterial(request, course);
-        final var requestedCount = request.questionCount() == null ? 6 : request.questionCount();
-        final var difficulty = request.difficulty() == null || request.difficulty().isBlank() ? "medium" : request.difficulty();
+        val source = buildSourceMaterial(request, course);
+        val requestedCount = request.questionCount() == null ? 6 : request.questionCount();
+        val difficulty = request.difficulty() == null || request.difficulty().isBlank() ? "medium" : request.difficulty();
 
         AiAssessmentDraftPayload payload;
         try {
-            final var response = aiClientService.generate(
+            val response = aiClientService.generate(
                     aiPromptBuilderService.assessmentDraftSystemPrompt(),
                     aiPromptBuilderService.buildAssessmentDraftUserPrompt(source, requestedCount, difficulty));
             payload = aiSafetyService.parseAssessmentDraft(response);
@@ -133,14 +134,14 @@ public class AssessmentService {
     }
 
     @Transactional
-    public AssessmentResponse createFromDraft(AssessmentCreateFromDraftRequest request) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
-        final var course = courseService.getEntity(request.courseId());
+    public AssessmentResponse createFromDraft(final AssessmentCreateFromDraftRequest request) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val course = courseService.getEntity(request.courseId());
         validateTeacherOrAdminAccess(actor, course);
         validateDraftSourceScope(request);
         validateAssessmentPayload(request.questions(), request.answerKey(), request.rubricCriteria());
 
-        final var entity = new AssessmentEntity();
+        val entity = new AssessmentEntity();
         entity.setCourseId(request.courseId());
         entity.setCreatedBy(actor.getId());
         entity.setTitle(request.title());
@@ -155,35 +156,35 @@ public class AssessmentService {
     }
 
     @Transactional(readOnly = true)
-    public AssessmentStudentResponse getStudentView(UUID assessmentId) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
-        final var assessment = getEntity(assessmentId);
-        final var course = courseService.getEntity(assessment.getCourseId());
+    public AssessmentStudentResponse getStudentView(final UUID assessmentId) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val assessment = getEntity(assessmentId);
+        val course = courseService.getEntity(assessment.getCourseId());
         validateCanReadAssessment(actor, course);
         return toStudentResponse(assessment);
     }
 
     @Transactional(readOnly = true)
-    public AssessmentResponse getDetails(UUID assessmentId) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
-        final var assessment = getEntity(assessmentId);
-        final var course = courseService.getEntity(assessment.getCourseId());
+    public AssessmentResponse getDetails(final UUID assessmentId) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val assessment = getEntity(assessmentId);
+        val course = courseService.getEntity(assessment.getCourseId());
         validateTeacherOrAdminAccess(actor, course);
         return assessmentMapper.toResponse(assessment);
     }
 
     @Transactional(readOnly = true)
-    public AssessmentEntity getEntity(UUID assessmentId) {
+    public AssessmentEntity getEntity(final UUID assessmentId) {
         return assessmentRepository.findById(assessmentId)
                 .orElseThrow(() -> new NotFoundException("Assessment not found: " + assessmentId));
     }
 
     @Transactional(readOnly = true)
-    public CursorPageResponse<AssessmentStudentResponse> listByCourse(UUID courseId, Integer limit, String cursor) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
-        final var course = courseService.getEntity(courseId);
+    public CursorPageResponse<AssessmentStudentResponse> listByCourse(final UUID courseId, final Integer limit, final String cursor) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val course = courseService.getEntity(courseId);
         validateCanReadAssessment(actor, course);
-        final var pageable = paginationUtils.toPageable(limit, cursor);
+        val pageable = paginationUtils.toPageable(limit, cursor);
         final Page<AssessmentStudentResponse> page = assessmentRepository.findByCourseId(courseId, pageable).map(this::toStudentResponse);
         return new CursorPageResponse<>(
                 page.getContent(),
@@ -192,15 +193,15 @@ public class AssessmentService {
     }
 
     @Transactional
-    public AssessmentResponse update(UUID assessmentId, AssessmentUpdateRequest request) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
-        final var assessment = getEntity(assessmentId);
-        final var course = courseService.getEntity(assessment.getCourseId());
+    public AssessmentResponse update(final UUID assessmentId, final AssessmentUpdateRequest request) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val assessment = getEntity(assessmentId);
+        val course = courseService.getEntity(assessment.getCourseId());
         validateTeacherOrAdminAccess(actor, course);
 
-        final var nextQuestions = request.questions() == null ? readStringList(assessment.getQuestionsJson()) : request.questions();
-        final var nextAnswerKey = request.answerKey() == null ? readStringList(assessment.getAnswerKeyJson()) : request.answerKey();
-        final var nextRubric = request.rubricCriteria() == null ? readStringList(assessment.getRubricJson()) : request.rubricCriteria();
+        val nextQuestions = request.questions() == null ? readStringList(assessment.getQuestionsJson()) : request.questions();
+        val nextAnswerKey = request.answerKey() == null ? readStringList(assessment.getAnswerKeyJson()) : request.answerKey();
+        val nextRubric = request.rubricCriteria() == null ? readStringList(assessment.getRubricJson()) : request.rubricCriteria();
         validateAssessmentPayload(nextQuestions, nextAnswerKey, nextRubric);
 
         if (request.title() != null) {
@@ -228,22 +229,22 @@ public class AssessmentService {
     }
 
     @Transactional
-    public void delete(UUID assessmentId) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
-        final var assessment = getEntity(assessmentId);
-        final var course = courseService.getEntity(assessment.getCourseId());
+    public void delete(final UUID assessmentId) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val assessment = getEntity(assessmentId);
+        val course = courseService.getEntity(assessment.getCourseId());
         validateTeacherOrAdminAccess(actor, course);
         assessmentRepository.delete(assessment);
     }
 
-    private void validateTeacherOrAdminAccess(UserEntity actor, CourseEntity course) {
-        final var canCreate = actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId());
+    private void validateTeacherOrAdminAccess(final UserEntity actor, final CourseEntity course) {
+        val canCreate = actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId());
         if (!canCreate) {
             throw new ForbiddenException("Only course teacher or admin can manage assessments");
         }
     }
 
-    private void validateCanReadAssessment(UserEntity actor, CourseEntity course) {
+    private void validateCanReadAssessment(final UserEntity actor, final CourseEntity course) {
         if (actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId())) {
             return;
         }
@@ -253,29 +254,29 @@ public class AssessmentService {
         throw new ForbiddenException("Only course teacher, enrolled students, or admin can view assessments");
     }
 
-    private void validateSourceScope(AssessmentGenerateRequest request) {
+    private void validateSourceScope(final AssessmentGenerateRequest request) {
         if (request.lessonId() != null && request.lectureId() != null) {
             throw new BadRequestException("Use lessonId or lectureId, not both");
         }
     }
 
-    private void validateDraftSourceScope(AssessmentCreateFromDraftRequest request) {
+    private void validateDraftSourceScope(final AssessmentCreateFromDraftRequest request) {
         if (request.lessonId() != null && request.lectureId() != null) {
             throw new BadRequestException("Use lessonId or lectureId, not both");
         }
     }
 
-    private void validateAssessmentPayload(List<String> questions, List<String> answerKey, List<String> rubricCriteria) {
+    private void validateAssessmentPayload(final List<String> questions, final List<String> answerKey, final List<String> rubricCriteria) {
         if (questions.size() != answerKey.size() || questions.size() != rubricCriteria.size()) {
             throw new BadRequestException("Questions, answerKey, and rubricCriteria must have the same size");
         }
     }
 
-    private void applySource(AssessmentEntity entity, UUID courseId, UUID lessonId, UUID lectureId) {
+    private void applySource(final AssessmentEntity entity, final UUID courseId, final UUID lessonId, final UUID lectureId) {
         if (lectureId != null) {
-            final var lecture = lectureRepository.findById(lectureId)
+            val lecture = lectureRepository.findById(lectureId)
                     .orElseThrow(() -> new NotFoundException("Lecture not found: " + lectureId));
-            final var lesson = lessonRepository.findById(lecture.getLessonId())
+            val lesson = lessonRepository.findById(lecture.getLessonId())
                     .orElseThrow(() -> new NotFoundException("Lesson not found for lecture: " + lectureId));
             if (!lesson.getCourseId().equals(courseId)) {
                 throw new BadRequestException("Lecture does not belong to the requested course");
@@ -285,7 +286,7 @@ public class AssessmentService {
             return;
         }
         if (lessonId != null) {
-            final var lesson = lessonRepository.findById(lessonId)
+            val lesson = lessonRepository.findById(lessonId)
                     .orElseThrow(() -> new NotFoundException("Lesson not found: " + lessonId));
             if (!lesson.getCourseId().equals(courseId)) {
                 throw new BadRequestException("Lesson does not belong to the requested course");
@@ -298,17 +299,17 @@ public class AssessmentService {
         entity.setSourceId(courseId);
     }
 
-    private String buildSourceMaterial(AssessmentGenerateRequest request, CourseEntity course) {
-        final var builder = new StringBuilder();
+    private String buildSourceMaterial(final AssessmentGenerateRequest request, final CourseEntity course) {
+        val builder = new StringBuilder();
         builder.append("Course: ").append(course.getTitle()).append('\n');
         if (course.getDescription() != null) {
             builder.append("Course description: ").append(course.getDescription()).append('\n');
         }
 
         if (request.lectureId() != null) {
-            final var lecture = lectureRepository.findById(request.lectureId())
+            val lecture = lectureRepository.findById(request.lectureId())
                     .orElseThrow(() -> new NotFoundException("Lecture not found: " + request.lectureId()));
-            final var lesson = lessonRepository.findById(lecture.getLessonId())
+            val lesson = lessonRepository.findById(lecture.getLessonId())
                     .orElseThrow(() -> new NotFoundException("Lesson not found for lecture: " + request.lectureId()));
             if (!lesson.getCourseId().equals(request.courseId())) {
                 throw new BadRequestException("Lecture does not belong to the requested course");
@@ -324,7 +325,7 @@ public class AssessmentService {
         }
 
         if (request.lessonId() != null) {
-            final var lesson = lessonRepository.findById(request.lessonId())
+            val lesson = lessonRepository.findById(request.lessonId())
                     .orElseThrow(() -> new NotFoundException("Lesson not found: " + request.lessonId()));
             if (!lesson.getCourseId().equals(request.courseId())) {
                 throw new BadRequestException("Lesson does not belong to the requested course");
@@ -334,12 +335,12 @@ public class AssessmentService {
             return builder.toString();
         }
 
-        final var lessons = lessonRepository.findByCourseId(request.courseId());
-        for (var lesson : lessons) {
+        val lessons = lessonRepository.findByCourseId(request.courseId());
+        for (val lesson : lessons) {
             builder.append("Lesson title: ").append(lesson.getTitle()).append('\n');
             builder.append("Lesson content: ").append(lesson.getContent()).append('\n');
-            final var lectures = lectureRepository.findByLessonId(lesson.getId());
-            for (var lecture : lectures) {
+            val lectures = lectureRepository.findByLessonId(lesson.getId());
+            for (val lecture : lectures) {
                 builder.append("Lecture title: ").append(lecture.getTitle()).append('\n');
                 if (lecture.getContent() != null) {
                     builder.append("Lecture content: ").append(lecture.getContent()).append('\n');
@@ -349,7 +350,7 @@ public class AssessmentService {
         return builder.toString();
     }
 
-    private String writeJson(Object value) {
+    private String writeJson(final Object value) {
         try {
             return objectMapper.writeValueAsString(value);
         } catch (JsonProcessingException ex) {
@@ -357,7 +358,7 @@ public class AssessmentService {
         }
     }
 
-    private AssessmentStudentResponse toStudentResponse(AssessmentEntity entity) {
+    private AssessmentStudentResponse toStudentResponse(final AssessmentEntity entity) {
         return new AssessmentStudentResponse(
                 entity.getId(),
                 entity.getCourseId(),
@@ -369,7 +370,7 @@ public class AssessmentService {
                 entity.getCreatedAt());
     }
 
-    private List<String> readStringList(String json) {
+    private List<String> readStringList(final String json) {
         if (json == null || json.isBlank()) {
             return List.of();
         }
@@ -380,15 +381,15 @@ public class AssessmentService {
         }
     }
 
-    private AiAssessmentDraftPayload fallbackDraftPayload(String courseTitle, int questionCount, String difficulty, String source) {
-        final var questions = new ArrayList<String>();
-        final var answerKey = new ArrayList<String>();
-        final var rubric = List.of(
+    private AiAssessmentDraftPayload fallbackDraftPayload(final String courseTitle, final int questionCount, final String difficulty, final String source) {
+        val questions = new ArrayList<String>();
+        val answerKey = new ArrayList<String>();
+        val rubric = List.of(
                 "Correctness of key concept explanation",
                 "Use of course terminology and examples",
                 "Clarity and structure of the answer"
         );
-        final var safeCount = Math.max(3, questionCount);
+        val safeCount = Math.max(3, questionCount);
         for (int i = 1; i <= safeCount; i++) {
             questions.add("Q" + i + ". Explain one important concept from the provided material and apply it in a practical example.");
             answerKey.add("A" + i + ". The answer should define the concept, explain why it matters, and show one practical application.");

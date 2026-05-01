@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.testsupport;
 
+import lombok.val;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,13 @@ import java.util.UUID;
 
 public abstract class EndpointIntegrationTestSupport {
 
-    protected static final String adminToken = "admin-token";
-    protected static final String teacherToken = "teacher-token";
-    protected static final String studentToken = "student-token";
-    private static final String localHostBaseUrl = "http://localhost:";
+    protected static final String ADMIN_TOKEN = "admin-token";
+    protected static final String TEACHER_TOKEN = "teacher-token";
+    protected static final String STUDENT_TOKEN = "student-token";
+    protected static final String adminToken = ADMIN_TOKEN;
+    protected static final String teacherToken = TEACHER_TOKEN;
+    protected static final String studentToken = STUDENT_TOKEN;
+    private static final String LOCAL_HOST_BASE_URL = "http://localhost:";
 
     @LocalServerPort
     protected int port;
@@ -43,48 +47,48 @@ public abstract class EndpointIntegrationTestSupport {
         jdbcTemplate.update("delete from users");
     }
 
-    protected UUID insertUser(String sub, String username, String email, String role) {
-        final var id = UUID.randomUUID();
+    protected UUID insertUser(final String sub, final String username, final String email, final String role) {
+        val id = UUID.randomUUID();
         jdbcTemplate.update(
                 "insert into users(id, keycloak_sub, username, email, role, created_at) values (?,?,?,?,?,CURRENT_TIMESTAMP)",
                 id, sub, username, email, role);
         return id;
     }
 
-    protected UUID insertCourse(UUID teacherId, String title) {
-        final var id = UUID.randomUUID();
+    protected UUID insertCourse(final UUID teacherId, final String title) {
+        val id = UUID.randomUUID();
         jdbcTemplate.update(
                 "insert into courses(id, title, description, teacher_id, created_at) values (?,?,?,?,CURRENT_TIMESTAMP)",
                 id, title, "seeded", teacherId);
         return id;
     }
 
-    protected UUID insertLesson(UUID courseId, String title) {
-        final var id = UUID.randomUUID();
+    protected UUID insertLesson(final UUID courseId, final String title) {
+        val id = UUID.randomUUID();
         jdbcTemplate.update(
                 "insert into lessons(id, course_id, title, content) values (?,?,?,?)",
                 id, courseId, title, "seeded lesson content");
         return id;
     }
 
-    protected UUID insertLecture(UUID lessonId, String title) {
-        final var id = UUID.randomUUID();
+    protected UUID insertLecture(final UUID lessonId, final String title) {
+        val id = UUID.randomUUID();
         jdbcTemplate.update(
                 "insert into lectures(id, lesson_id, title, content) values (?,?,?,?)",
                 id, lessonId, title, "seeded lecture content");
         return id;
     }
 
-    protected UUID insertEnrollment(UUID userId, UUID courseId) {
-        final var id = UUID.randomUUID();
+    protected UUID insertEnrollment(final UUID userId, final UUID courseId) {
+        val id = UUID.randomUUID();
         jdbcTemplate.update(
                 "insert into enrollments(id, user_id, course_id, enrolled_at) values (?,?,?,CURRENT_TIMESTAMP)",
                 id, userId, courseId);
         return id;
     }
 
-    protected UUID insertAssessment(UUID courseId, UUID createdBy, String title) {
-        final var id = UUID.randomUUID();
+    protected UUID insertAssessment(final UUID courseId, final UUID createdBy, final String title) {
+        val id = UUID.randomUUID();
         jdbcTemplate.update(
                 """
                         insert into assessments(id, course_id, created_by, title, description, created_at)
@@ -94,8 +98,8 @@ public abstract class EndpointIntegrationTestSupport {
         return id;
     }
 
-    protected UUID insertSubmission(UUID assessmentId, UUID studentId, int score) {
-        final var id = UUID.randomUUID();
+    protected UUID insertSubmission(final UUID assessmentId, final UUID studentId, final int score) {
+        val id = UUID.randomUUID();
         jdbcTemplate.update(
                 """
                         insert into submissions(id, assessment_id, student_id, answer_text, score, submitted_at, graded_at)
@@ -105,29 +109,29 @@ public abstract class EndpointIntegrationTestSupport {
         return id;
     }
 
-    protected UUID insertTag(String name) {
-        final var id = UUID.randomUUID();
+    protected UUID insertTag(final String name) {
+        val id = UUID.randomUUID();
         jdbcTemplate.update("insert into tags(id, name) values (?,?)", id, name);
         return id;
     }
 
-    protected void insertCourseTag(UUID courseId, UUID tagId) {
+    protected void insertCourseTag(final UUID courseId, final UUID tagId) {
         jdbcTemplate.update("insert into course_tags(course_id, tag_id) values (?,?)", courseId, tagId);
     }
 
-    protected ApiResult get(String path, String token) {
+    protected ApiResult get(final String path, final String token) {
         return request(path, HttpMethod.GET, null, token);
     }
 
-    protected ApiResult post(String path, String body, String token) {
+    protected ApiResult post(final String path, final String body, final String token) {
         return request(path, HttpMethod.POST, body, token);
     }
 
-    protected ApiResult patch(String path, String body, String token) {
+    protected ApiResult patch(final String path, final String body, final String token) {
         return request(path, HttpMethod.PATCH, body, token);
     }
 
-    protected ApiResult put(String path, String body, String token) {
+    protected ApiResult put(final String path, final String body, final String token) {
         return request(path, HttpMethod.PUT, body, token);
     }
 
@@ -138,9 +142,9 @@ public abstract class EndpointIntegrationTestSupport {
         return objectMapper.readTree(body);
     }
 
-    private ApiResult request(String path, HttpMethod method, String body, String token) {
-        final var client = RestClient.create();
-        final var url = localHostBaseUrl + port + path;
+    private ApiResult request(final String path, final HttpMethod method, final String body, final String token) {
+        val client = RestClient.create();
+        val url = LOCAL_HOST_BASE_URL + port + path;
 
         if (HttpMethod.GET.equals(method)) {
             return client.get()
@@ -175,14 +179,14 @@ public abstract class EndpointIntegrationTestSupport {
         throw new IllegalArgumentException("Unsupported method: " + method);
     }
 
-    private void addBearer(HttpHeaders headers, String token) {
+    private void addBearer(final HttpHeaders headers, final String token) {
         if (token != null && !token.isBlank()) {
             headers.setBearerAuth(token);
         }
     }
 
     private ApiResult toResult(org.springframework.http.client.ClientHttpResponse response) throws IOException {
-        final var responseBody = new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8);
+        val responseBody = new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8);
         return new ApiResult(response.getStatusCode().value(), responseBody);
     }
 

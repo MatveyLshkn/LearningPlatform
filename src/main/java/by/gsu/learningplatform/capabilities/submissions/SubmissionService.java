@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.submissions;
 
+import lombok.val;
 import by.gsu.learningplatform.capabilities.assessments.AssessmentEntity;
 import by.gsu.learningplatform.capabilities.assessments.AssessmentService;
 import by.gsu.learningplatform.capabilities.courses.CourseEntity;
@@ -53,13 +54,13 @@ public class SubmissionService {
     }
 
     @Transactional
-    public SubmissionResponse submit(SubmissionCreateRequest request) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+    public SubmissionResponse submit(final SubmissionCreateRequest request) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
         if (actor.getRole() == UserRole.TEACHER) {
             throw new ForbiddenException("Teachers cannot submit student answers");
         }
 
-        final var assessment = assessmentService.getEntity(request.assessmentId());
+        val assessment = assessmentService.getEntity(request.assessmentId());
         courseService.getEntity(assessment.getCourseId());
         if (actor.getRole() == UserRole.STUDENT && !enrollmentRepository.existsByUserIdAndCourseId(actor.getId(), assessment.getCourseId())) {
             throw new ForbiddenException("Only enrolled students can submit answers for this course");
@@ -68,7 +69,7 @@ public class SubmissionService {
             throw new ConflictException("Assessment already has a submission from this user");
         }
 
-        final var entity = new SubmissionEntity();
+        val entity = new SubmissionEntity();
         entity.setAssessmentId(request.assessmentId());
         entity.setStudentId(actor.getId());
         entity.setAnswerText(request.answerText());
@@ -77,38 +78,38 @@ public class SubmissionService {
     }
 
     @Transactional
-    public SubmissionResponse grade(UUID submissionId, SubmissionGradeRequest request) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
-        final var submission = submissionRepository.findById(submissionId)
+    public SubmissionResponse grade(final UUID submissionId, final SubmissionGradeRequest request) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val submission = submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new NotFoundException("Submission not found: " + submissionId));
 
-        final var assessment = assessmentService.getEntity(submission.getAssessmentId());
-        final var course = courseService.getEntity(assessment.getCourseId());
+        val assessment = assessmentService.getEntity(submission.getAssessmentId());
+        val course = courseService.getEntity(assessment.getCourseId());
 
-        final var canGrade = actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId());
+        val canGrade = actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId());
         if (!canGrade) {
             throw new ForbiddenException("Only course teacher or admin can grade submissions");
         }
 
         submission.setScore(request.score());
         submission.setGradedAt(OffsetDateTime.now());
-        final var saved = submissionRepository.save(submission);
+        val saved = submissionRepository.save(submission);
         businessMetrics.incrementGradedSubmissions();
         return submissionMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
-    public Page<SubmissionResponse> listOwn(Pageable pageable) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+    public Page<SubmissionResponse> listOwn(final Pageable pageable) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
         return submissionRepository.findByStudentId(actor.getId(), pageable).map(submissionMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
-    public Page<SubmissionResponse> listByAssessment(UUID assessmentId, Pageable pageable) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
-        final var assessment = assessmentService.getEntity(assessmentId);
-        final var course = courseService.getEntity(assessment.getCourseId());
-        final var canRead = actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId());
+    public Page<SubmissionResponse> listByAssessment(final UUID assessmentId, final Pageable pageable) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val assessment = assessmentService.getEntity(assessmentId);
+        val course = courseService.getEntity(assessment.getCourseId());
+        val canRead = actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId());
         if (!canRead) {
             throw new ForbiddenException("Only course teacher or admin can view assessment submissions");
         }

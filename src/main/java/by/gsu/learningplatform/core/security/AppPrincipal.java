@@ -8,9 +8,9 @@ public record AppPrincipal(UUID userId,
                            String username,
                            Set<String> roles) {
 
-    private static final String rolePrefix = "ROLE_";
+    private static final String ROLE_PREFIX = "ROLE_";
 
-    public boolean hasRole(String role) {
-        return roles.contains(role) || roles.contains(rolePrefix + role);
+    public boolean hasRole(final String role) {
+        return roles.contains(role) || roles.contains(ROLE_PREFIX + role);
     }
 }

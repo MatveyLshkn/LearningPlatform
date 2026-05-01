@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.core.config;
 
+import lombok.val;
 import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.boot.jpa.autoconfigure.EntityManagerFactoryDependsOnPostProcessor;
 import org.springframework.context.annotation.Bean;
@@ -11,9 +12,9 @@ import javax.sql.DataSource;
 public class LiquibaseConfig {
 
     @Bean("liquibase")
-    public SpringLiquibase liquibase(DataSource dataSource, LearningPlatformProperties properties) {
-        final var liquibaseProperties = properties.liquibase();
-        final var liquibase = new SpringLiquibase();
+    public SpringLiquibase liquibase(final DataSource dataSource, final LearningPlatformProperties properties) {
+        val liquibaseProperties = properties.liquibase();
+        val liquibase = new SpringLiquibase();
         liquibase.setDataSource(dataSource);
         liquibase.setChangeLog(liquibaseProperties.changeLog());
         liquibase.setShouldRun(liquibaseProperties.enabled());

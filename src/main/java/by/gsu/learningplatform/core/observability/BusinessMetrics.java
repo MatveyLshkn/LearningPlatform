@@ -14,7 +14,7 @@ public class BusinessMetrics {
     private final Counter gradedSubmissionsCounter;
     private final AtomicInteger activeUsersGauge = new AtomicInteger(0);
 
-    public BusinessMetrics(MeterRegistry meterRegistry) {
+    public BusinessMetrics(final MeterRegistry meterRegistry) {
         this.enrollmentsCounter = Counter.builder("learningplatform_enrollments_total")
                 .description("Total enrollments")
                 .register(meterRegistry);
@@ -34,7 +34,7 @@ public class BusinessMetrics {
         gradedSubmissionsCounter.increment();
     }
 
-    public void setActiveUsers(int value) {
+    public void setActiveUsers(final int value) {
         activeUsersGauge.set(value);
     }
 }

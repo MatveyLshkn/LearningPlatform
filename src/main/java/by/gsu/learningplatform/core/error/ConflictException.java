@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public class ConflictException extends ApiException {
 
-    public ConflictException(String message) {
+    public ConflictException(final String message) {
         super(HttpStatus.CONFLICT, "https://learning-platform/errors/conflict", message);
     }
 }

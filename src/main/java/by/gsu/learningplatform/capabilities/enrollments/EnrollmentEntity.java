@@ -32,7 +32,7 @@ public class EnrollmentEntity {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -40,7 +40,7 @@ public class EnrollmentEntity {
         return userId;
     }
 
-    public void setUserId(UUID userId) {
+    public void setUserId(final UUID userId) {
         this.userId = userId;
     }
 
@@ -48,7 +48,7 @@ public class EnrollmentEntity {
         return courseId;
     }
 
-    public void setCourseId(UUID courseId) {
+    public void setCourseId(final UUID courseId) {
         this.courseId = courseId;
     }
 
@@ -56,7 +56,7 @@ public class EnrollmentEntity {
         return enrolledAt;
     }
 
-    public void setEnrolledAt(OffsetDateTime enrolledAt) {
+    public void setEnrolledAt(final OffsetDateTime enrolledAt) {
         this.enrolledAt = enrolledAt;
     }
 }

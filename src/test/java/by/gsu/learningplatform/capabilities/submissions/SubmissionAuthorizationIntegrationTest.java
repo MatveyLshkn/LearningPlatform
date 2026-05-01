@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.submissions;
 
+import lombok.val;
 import by.gsu.learningplatform.testsupport.EndpointIntegrationTestSupport;
 import by.gsu.learningplatform.testsupport.TestSecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +34,7 @@ class SubmissionAuthorizationIntegrationTest extends EndpointIntegrationTestSupp
 
     @Test
     void shouldForbidNonEnrolledStudentSubmission() {
-        final var response = post("/submissions", submissionPayload(), studentToken);
+        val response = post("/submissions", submissionPayload(), studentToken);
 
         assertEquals(403, response.statusCode());
     }
@@ -42,7 +43,7 @@ class SubmissionAuthorizationIntegrationTest extends EndpointIntegrationTestSupp
     void shouldAllowEnrolledStudentSubmission() {
         insertEnrollment(studentId, courseId);
 
-        final var response = post("/submissions", submissionPayload(), studentToken);
+        val response = post("/submissions", submissionPayload(), studentToken);
 
         assertEquals(201, response.statusCode());
     }
@@ -51,7 +52,7 @@ class SubmissionAuthorizationIntegrationTest extends EndpointIntegrationTestSupp
     void shouldForbidUnrelatedTeacherFromReadingAssessmentSubmissions() {
         insertSubmission(assessmentId, studentId, 90);
 
-        final var response = get("/submissions/assessment/" + assessmentId, "other-teacher-token");
+        val response = get("/submissions/assessment/" + assessmentId, "other-teacher-token");
 
         assertEquals(403, response.statusCode());
     }
@@ -60,7 +61,7 @@ class SubmissionAuthorizationIntegrationTest extends EndpointIntegrationTestSupp
     void shouldAllowOwningTeacherToReadAssessmentSubmissions() {
         insertSubmission(assessmentId, studentId, 90);
 
-        final var response = get("/submissions/assessment/" + assessmentId, teacherToken);
+        val response = get("/submissions/assessment/" + assessmentId, teacherToken);
 
         assertEquals(200, response.statusCode());
     }
@@ -69,7 +70,7 @@ class SubmissionAuthorizationIntegrationTest extends EndpointIntegrationTestSupp
     void shouldAllowAdminToReadAssessmentSubmissions() {
         insertSubmission(assessmentId, studentId, 90);
 
-        final var response = get("/submissions/assessment/" + assessmentId, adminToken);
+        val response = get("/submissions/assessment/" + assessmentId, adminToken);
 
         assertEquals(200, response.statusCode());
     }

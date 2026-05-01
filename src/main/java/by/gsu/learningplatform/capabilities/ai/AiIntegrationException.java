@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 
 public class AiIntegrationException extends ApiException {
 
-    public AiIntegrationException(String message) {
+    public AiIntegrationException(final String message) {
         super(HttpStatus.SERVICE_UNAVAILABLE, "AI_INTEGRATION_ERROR", message);
     }
 }

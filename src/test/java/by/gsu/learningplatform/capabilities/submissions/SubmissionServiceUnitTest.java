@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.submissions;
 
+import lombok.val;
 import by.gsu.learningplatform.capabilities.assessments.AssessmentService;
 import by.gsu.learningplatform.capabilities.courses.CourseService;
 import by.gsu.learningplatform.capabilities.enrollments.EnrollmentRepository;
@@ -47,8 +48,8 @@ class SubmissionServiceUnitTest {
 
     @Test
     void shouldRejectTeacherSubmission() {
-        final var userId = UUID.randomUUID();
-        final var teacher = new UserEntity();
+        val userId = UUID.randomUUID();
+        val teacher = new UserEntity();
         teacher.setId(userId);
         teacher.setRole(UserRole.TEACHER);
 

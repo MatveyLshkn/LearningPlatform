@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.users;
 
+import lombok.val;
 import by.gsu.learningplatform.core.error.BadRequestException;
 import by.gsu.learningplatform.core.error.ConflictException;
 import org.springframework.stereotype.Service;
@@ -11,13 +12,13 @@ public class UserRegistrationService {
     private final UserRepository userRepository;
     private final KeycloakAdminClient keycloakAdminClient;
 
-    public UserRegistrationService(UserRepository userRepository, KeycloakAdminClient keycloakAdminClient) {
+    public UserRegistrationService(final UserRepository userRepository, final KeycloakAdminClient keycloakAdminClient) {
         this.userRepository = userRepository;
         this.keycloakAdminClient = keycloakAdminClient;
     }
 
     @Transactional
-    public UserRegistrationResponse register(UserRegistrationRequest request) {
+    public UserRegistrationResponse register(final UserRegistrationRequest request) {
         if (request.role() == UserRole.ADMIN) {
             throw new BadRequestException("ADMIN cannot be self-assigned");
         }
@@ -29,19 +30,19 @@ public class UserRegistrationService {
             throw new ConflictException("Email already exists");
         });
 
-        final var keycloakSub = keycloakAdminClient.createUserAndAssignRole(
+        val keycloakSub = keycloakAdminClient.createUserAndAssignRole(
                 request.username(),
                 request.email(),
                 request.password(),
                 request.role().name());
 
-        final var entity = new UserEntity();
+        val entity = new UserEntity();
         entity.setKeycloakSub(keycloakSub);
         entity.setUsername(request.username());
         entity.setEmail(request.email());
         entity.setRole(request.role());
 
-        final var saved = userRepository.save(entity);
+        val saved = userRepository.save(entity);
 
         return new UserRegistrationResponse(
                 saved.getId(),

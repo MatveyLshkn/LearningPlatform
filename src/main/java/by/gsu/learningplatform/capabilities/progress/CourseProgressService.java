@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.progress;
 
+import lombok.val;
 import by.gsu.learningplatform.capabilities.courses.CourseEntity;
 import by.gsu.learningplatform.capabilities.courses.CourseService;
 import by.gsu.learningplatform.capabilities.enrollments.EnrollmentRepository;
@@ -43,16 +44,16 @@ public class CourseProgressService {
     }
 
     @Transactional(readOnly = true)
-    public CourseProgressResponse getOwnProgress(UUID courseId) {
-        final var actor = currentUser();
+    public CourseProgressResponse getOwnProgress(final UUID courseId) {
+        val actor = currentUser();
         return getProgress(courseId, actor.getId());
     }
 
     @Transactional(readOnly = true)
-    public CourseProgressResponse getProgress(UUID courseId, UUID userId) {
-        final var actor = currentUser();
-        final var course = courseService.getEntity(courseId);
-        final var user = userService.getById(userId);
+    public CourseProgressResponse getProgress(final UUID courseId, final UUID userId) {
+        val actor = currentUser();
+        val course = courseService.getEntity(courseId);
+        val user = userService.getById(userId);
         validateCanRead(actor, course, user);
         validateEnrollment(courseId, user);
         return buildResponse(courseId, userId);
@@ -63,16 +64,16 @@ public class CourseProgressService {
                                                         UUID userId,
                                                         UUID lectureId,
                                                         LectureProgressUpdateRequest request) {
-        final var actor = currentUser();
-        final var course = courseService.getEntity(courseId);
-        final var user = userService.getById(userId);
+        val actor = currentUser();
+        val course = courseService.getEntity(courseId);
+        val user = userService.getById(userId);
         validateCanWrite(actor, course, user);
         validateEnrollment(courseId, user);
         validateLectureBelongsToCourse(courseId, lectureId);
 
         if (request.completed()) {
             lectureProgressRepository.findByUserIdAndLectureId(userId, lectureId).orElseGet(() -> {
-                final var progress = new LectureProgressEntity();
+                val progress = new LectureProgressEntity();
                 progress.setUserId(userId);
                 progress.setLectureId(lectureId);
                 return lectureProgressRepository.save(progress);
@@ -85,23 +86,23 @@ public class CourseProgressService {
         return buildResponse(courseId, userId);
     }
 
-    private CourseProgressResponse buildResponse(UUID courseId, UUID userId) {
-        final var lectureIds = lectureRepository.findIdsByCourseId(courseId);
+    private CourseProgressResponse buildResponse(final UUID courseId, final UUID userId) {
+        val lectureIds = lectureRepository.findIdsByCourseId(courseId);
         if (lectureIds.isEmpty()) {
             return new CourseProgressResponse(courseId, userId, 0, 0, 0.0, List.of(), null);
         }
 
-        final var progressRows = lectureProgressRepository.findByUserIdAndLectureIdIn(userId, lectureIds);
-        final var completedLectureIds = progressRows.stream()
+        val progressRows = lectureProgressRepository.findByUserIdAndLectureIdIn(userId, lectureIds);
+        val completedLectureIds = progressRows.stream()
                 .map(LectureProgressEntity::getLectureId)
                 .sorted()
                 .toList();
-        final var lastCompletedAt = progressRows.stream()
+        val lastCompletedAt = progressRows.stream()
                 .map(LectureProgressEntity::getCompletedAt)
                 .max(Comparator.naturalOrder())
                 .orElse(null);
-        final var completedCount = completedLectureIds.size();
-        final var percent = Math.round(((double) completedCount / lectureIds.size()) * 10000.0) / 100.0;
+        val completedCount = completedLectureIds.size();
+        val percent = Math.round(((double) completedCount / lectureIds.size()) * 10000.0) / 100.0;
 
         return new CourseProgressResponse(
                 courseId,
@@ -113,7 +114,7 @@ public class CourseProgressService {
                 lastCompletedAt);
     }
 
-    private void validateCanRead(UserEntity actor, CourseEntity course, UserEntity user) {
+    private void validateCanRead(final UserEntity actor, final CourseEntity course, final UserEntity user) {
         if (actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId())) {
             return;
         }
@@ -123,14 +124,14 @@ public class CourseProgressService {
         throw new ForbiddenException("You cannot view this user's course progress");
     }
 
-    private void validateCanWrite(UserEntity actor, CourseEntity course, UserEntity user) {
+    private void validateCanWrite(final UserEntity actor, final CourseEntity course, final UserEntity user) {
         if (actor.getRole() == UserRole.STUDENT && actor.getId().equals(user.getId())) {
             return;
         }
         throw new ForbiddenException("Only students can update their own course progress");
     }
 
-    private void validateLectureBelongsToCourse(UUID courseId, UUID lectureId) {
+    private void validateLectureBelongsToCourse(final UUID courseId, final UUID lectureId) {
         if (!lectureRepository.existsById(lectureId)) {
             throw new NotFoundException("Lecture not found: " + lectureId);
         }
@@ -139,7 +140,7 @@ public class CourseProgressService {
         }
     }
 
-    private void validateEnrollment(UUID courseId, UserEntity user) {
+    private void validateEnrollment(final UUID courseId, final UserEntity user) {
         if (user.getRole() == UserRole.STUDENT && !enrollmentRepository.existsByUserIdAndCourseId(user.getId(), courseId)) {
             throw new BadRequestException("Student is not enrolled in this course");
         }

@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.lessons;
 
+import lombok.val;
 import jakarta.validation.Valid;
 import by.gsu.learningplatform.core.web.CursorPageResponse;
 import by.gsu.learningplatform.core.web.PaginationUtils;
@@ -25,19 +26,19 @@ public class LessonController {
     private final LessonService lessonService;
     private final PaginationUtils paginationUtils;
 
-    public LessonController(LessonService lessonService, PaginationUtils paginationUtils) {
+    public LessonController(final LessonService lessonService, final PaginationUtils paginationUtils) {
         this.lessonService = lessonService;
         this.paginationUtils = paginationUtils;
     }
 
     @PostMapping("/lessons")
     @ResponseStatus(HttpStatus.CREATED)
-    public LessonResponse create(@Valid @RequestBody LessonRequest request) {
+    public LessonResponse create( @Valid @RequestBody final LessonRequest request) {
         return lessonService.create(request);
     }
 
     @GetMapping("/lessons/{lessonId}")
-    public LessonResponse get(@PathVariable UUID lessonId) {
+    public LessonResponse get( @PathVariable final UUID lessonId) {
         return lessonService.getById(lessonId);
     }
 
@@ -45,8 +46,8 @@ public class LessonController {
     public CursorPageResponse<LessonResponse> listByCourse(@PathVariable UUID courseId,
                                                            @org.springframework.web.bind.annotation.RequestParam(required = false) Integer limit,
                                                            @org.springframework.web.bind.annotation.RequestParam(required = false) String cursor) {
-        final var pageable = paginationUtils.toPageable(limit, cursor);
-        final var page = lessonService.listByCourse(courseId, pageable);
+        val pageable = paginationUtils.toPageable(limit, cursor);
+        val page = lessonService.listByCourse(courseId, pageable);
         return new CursorPageResponse<>(
                 page.getContent(),
                 new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), paginationUtils.nextCursor(page)),
@@ -54,13 +55,13 @@ public class LessonController {
     }
 
     @PatchMapping("/lessons/{lessonId}")
-    public LessonResponse update(@PathVariable UUID lessonId, @Valid @RequestBody LessonUpdateRequest request) {
+    public LessonResponse update( @PathVariable final UUID lessonId, @Valid @RequestBody final LessonUpdateRequest request) {
         return lessonService.update(lessonId, request);
     }
 
     @DeleteMapping("/lessons/{lessonId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable UUID lessonId) {
+    public void delete( @PathVariable final UUID lessonId) {
         lessonService.delete(lessonId);
     }
 }

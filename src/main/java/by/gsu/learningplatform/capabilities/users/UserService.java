@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.users;
 
+import lombok.val;
 import by.gsu.learningplatform.capabilities.assessments.AssessmentMapper;
 import by.gsu.learningplatform.capabilities.assessments.AssessmentRepository;
 import by.gsu.learningplatform.capabilities.courses.CourseEntity;
@@ -60,45 +61,45 @@ public class UserService {
         this.authFacade = authFacade;
     }
 
-    public UserEntity getById(UUID id) {
+    public UserEntity getById(final UUID id) {
         return userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found: " + id));
     }
 
-    public UserEntity getByKeycloakSub(String keycloakSub) {
+    public UserEntity getByKeycloakSub(final String keycloakSub) {
         return userRepository.findByKeycloakSub(keycloakSub)
                 .orElseThrow(() -> new NotFoundException("User not found for keycloak subject"));
     }
 
-    public UserResponse getUserResponse(UUID id) {
+    public UserResponse getUserResponse(final UUID id) {
         return userMapper.toResponse(getById(id));
     }
 
     public UserResponse getCurrentUserResponse() {
-        final var actor = getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val actor = getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
         return userMapper.toResponse(actor);
     }
 
-    public UserResponse getVisibleUserResponse(UUID id) {
-        final var actor = getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+    public UserResponse getVisibleUserResponse(final UUID id) {
+        val actor = getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
         if (actor.getRole() != UserRole.ADMIN && !actor.getId().equals(id)) {
             throw new ForbiddenException("You can view only your own profile");
         }
         return userMapper.toResponse(getById(id));
     }
 
-    public Page<UserResponse> listUsers(UserRole role, Pageable pageable) {
-        final var page = role == null ? userRepository.findAll(pageable) : userRepository.findByRole(role, pageable);
+    public Page<UserResponse> listUsers(final UserRole role, final Pageable pageable) {
+        val page = role == null ? userRepository.findAll(pageable) : userRepository.findByRole(role, pageable);
         return page.map(userMapper::toResponse);
     }
 
-    public UserDetailsResponse getUserDetails(UUID userId) {
-        final var user = getById(userId);
-        final var enrollments = enrollmentRepository.findByUserId(userId);
-        final var courseIds = enrollments.stream().map(enrollment -> enrollment.getCourseId()).toList();
+    public UserDetailsResponse getUserDetails(final UUID userId) {
+        val user = getById(userId);
+        val enrollments = enrollmentRepository.findByUserId(userId);
+        val courseIds = enrollments.stream().map(enrollment -> enrollment.getCourseId()).toList();
         final List<CourseEntity> enrolledCourses = courseIds.isEmpty() ? List.of() : courseRepository.findByIdIn(courseIds);
-        final var taughtCourses = courseRepository.findByTeacherId(userId);
-        final var submissions = submissionRepository.findByStudentId(userId);
-        final var createdAssessments = assessmentRepository.findByCreatedBy(userId);
+        val taughtCourses = courseRepository.findByTeacherId(userId);
+        val submissions = submissionRepository.findByStudentId(userId);
+        val createdAssessments = assessmentRepository.findByCreatedBy(userId);
 
         return new UserDetailsResponse(
                 userMapper.toResponse(user),

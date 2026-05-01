@@ -36,7 +36,7 @@ public class UserEntity extends AuditableEntity {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -44,7 +44,7 @@ public class UserEntity extends AuditableEntity {
         return keycloakSub;
     }
 
-    public void setKeycloakSub(String keycloakSub) {
+    public void setKeycloakSub(final String keycloakSub) {
         this.keycloakSub = keycloakSub;
     }
 
@@ -52,7 +52,7 @@ public class UserEntity extends AuditableEntity {
         return username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
@@ -60,7 +60,7 @@ public class UserEntity extends AuditableEntity {
         return email;
     }
 
-    public void setEmail(String email) {
+    public void setEmail(final String email) {
         this.email = email;
     }
 
@@ -68,7 +68,7 @@ public class UserEntity extends AuditableEntity {
         return role;
     }
 
-    public void setRole(UserRole role) {
+    public void setRole(final UserRole role) {
         this.role = role;
     }
 }

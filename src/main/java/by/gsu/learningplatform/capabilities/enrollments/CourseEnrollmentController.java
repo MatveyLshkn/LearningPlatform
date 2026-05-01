@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.enrollments;
 
+import lombok.val;
 import by.gsu.learningplatform.capabilities.users.UserResponse;
 import by.gsu.learningplatform.core.web.CursorPageResponse;
 import by.gsu.learningplatform.core.web.PaginationUtils;
@@ -19,7 +20,7 @@ public class CourseEnrollmentController {
     private final EnrollmentService enrollmentService;
     private final PaginationUtils paginationUtils;
 
-    public CourseEnrollmentController(EnrollmentService enrollmentService, PaginationUtils paginationUtils) {
+    public CourseEnrollmentController(final EnrollmentService enrollmentService, final PaginationUtils paginationUtils) {
         this.enrollmentService = enrollmentService;
         this.paginationUtils = paginationUtils;
     }
@@ -28,8 +29,8 @@ public class CourseEnrollmentController {
     public CursorPageResponse<UserResponse> listCourseStudents(@PathVariable UUID courseId,
                                                                @org.springframework.web.bind.annotation.RequestParam(required = false) Integer limit,
                                                                @org.springframework.web.bind.annotation.RequestParam(required = false) String cursor) {
-        final var pageable = paginationUtils.toPageable(limit, cursor);
-        final var page = enrollmentService.listCourseStudents(courseId, pageable);
+        val pageable = paginationUtils.toPageable(limit, cursor);
+        val page = enrollmentService.listCourseStudents(courseId, pageable);
         return new CursorPageResponse<>(
                 page.getContent(),
                 new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), paginationUtils.nextCursor(page)),

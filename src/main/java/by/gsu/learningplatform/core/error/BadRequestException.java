@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public class BadRequestException extends ApiException {
 
-    public BadRequestException(String message) {
+    public BadRequestException(final String message) {
         super(HttpStatus.BAD_REQUEST, "https://learning-platform/errors/bad-request", message);
     }
 }

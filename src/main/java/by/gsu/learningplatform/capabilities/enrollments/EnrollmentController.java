@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.enrollments;
 
+import lombok.val;
 import jakarta.validation.Valid;
 import by.gsu.learningplatform.core.web.CursorPageResponse;
 import by.gsu.learningplatform.core.web.PaginationUtils;
@@ -24,28 +25,28 @@ public class EnrollmentController {
     private final EnrollmentService enrollmentService;
     private final PaginationUtils paginationUtils;
 
-    public EnrollmentController(EnrollmentService enrollmentService, PaginationUtils paginationUtils) {
+    public EnrollmentController(final EnrollmentService enrollmentService, final PaginationUtils paginationUtils) {
         this.enrollmentService = enrollmentService;
         this.paginationUtils = paginationUtils;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EnrollmentResponse enroll(@Valid @RequestBody EnrollmentCreateRequest request) {
+    public EnrollmentResponse enroll( @Valid @RequestBody final EnrollmentCreateRequest request) {
         return enrollmentService.enroll(request);
     }
 
     @DeleteMapping("/{enrollmentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void leave(@PathVariable UUID enrollmentId) {
+    public void leave( @PathVariable final UUID enrollmentId) {
         enrollmentService.leave(enrollmentId);
     }
 
     @GetMapping
     public CursorPageResponse<EnrollmentResponse> listOwn(@org.springframework.web.bind.annotation.RequestParam(required = false) Integer limit,
                                                           @org.springframework.web.bind.annotation.RequestParam(required = false) String cursor) {
-        final var pageable = paginationUtils.toPageable(limit, cursor);
-        final var page = enrollmentService.listOwn(pageable);
+        val pageable = paginationUtils.toPageable(limit, cursor);
+        val page = enrollmentService.listOwn(pageable);
         return new CursorPageResponse<>(
                 page.getContent(),
                 new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), paginationUtils.nextCursor(page)),

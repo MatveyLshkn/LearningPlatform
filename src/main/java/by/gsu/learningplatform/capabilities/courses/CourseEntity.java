@@ -42,7 +42,7 @@ public class CourseEntity extends AuditableEntity {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -50,7 +50,7 @@ public class CourseEntity extends AuditableEntity {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -58,7 +58,7 @@ public class CourseEntity extends AuditableEntity {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
@@ -66,7 +66,7 @@ public class CourseEntity extends AuditableEntity {
         return teacherId;
     }
 
-    public void setTeacherId(UUID teacherId) {
+    public void setTeacherId(final UUID teacherId) {
         this.teacherId = teacherId;
     }
 
@@ -74,7 +74,7 @@ public class CourseEntity extends AuditableEntity {
         return tags;
     }
 
-    public void setTags(Set<TagEntity> tags) {
+    public void setTags(final Set<TagEntity> tags) {
         this.tags = tags;
     }
 }

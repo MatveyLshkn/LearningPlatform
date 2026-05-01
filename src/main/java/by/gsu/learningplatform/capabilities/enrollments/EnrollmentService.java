@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.enrollments;
 
+import lombok.val;
 import by.gsu.learningplatform.capabilities.courses.CourseService;
 import by.gsu.learningplatform.capabilities.users.UserEntity;
 import by.gsu.learningplatform.capabilities.users.UserMapper;
@@ -55,8 +56,8 @@ public class EnrollmentService {
     }
 
     @Transactional
-    public EnrollmentResponse enroll(EnrollmentCreateRequest request) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+    public EnrollmentResponse enroll(final EnrollmentCreateRequest request) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
         if (actor.getRole() == UserRole.TEACHER) {
             throw new ForbiddenException("Teachers cannot enroll as students");
         }
@@ -66,23 +67,23 @@ public class EnrollmentService {
             throw new ConflictException("User already enrolled in this course");
         });
 
-        final var entity = new EnrollmentEntity();
+        val entity = new EnrollmentEntity();
         entity.setUserId(actor.getId());
         entity.setCourseId(request.courseId());
 
-        final var saved = enrollmentRepository.save(entity);
+        val saved = enrollmentRepository.save(entity);
         businessMetrics.incrementEnrollments();
         return enrollmentMapper.toResponse(saved);
     }
 
     @Transactional
-    public void leave(UUID enrollmentId) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
-        final var enrollment = enrollmentRepository.findById(enrollmentId)
+    public void leave(final UUID enrollmentId) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new NotFoundException("Enrollment not found: " + enrollmentId));
 
-        final var isAdmin = actor.getRole() == UserRole.ADMIN;
-        final var isOwner = actor.getId().equals(enrollment.getUserId());
+        val isAdmin = actor.getRole() == UserRole.ADMIN;
+        val isOwner = actor.getId().equals(enrollment.getUserId());
         if (!(isAdmin || isOwner)) {
             throw new ForbiddenException("You can leave only your own enrollment");
         }
@@ -91,28 +92,28 @@ public class EnrollmentService {
     }
 
     @Transactional(readOnly = true)
-    public Page<EnrollmentResponse> listOwn(Pageable pageable) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+    public Page<EnrollmentResponse> listOwn(final Pageable pageable) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
         return enrollmentRepository.findByUserId(actor.getId(), pageable).map(enrollmentMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
-    public Page<UserResponse> listCourseStudents(UUID courseId, Pageable pageable) {
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
-        final var course = courseService.getEntity(courseId);
-        final var canReadRoster = actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId());
+    public Page<UserResponse> listCourseStudents(final UUID courseId, final Pageable pageable) {
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val course = courseService.getEntity(courseId);
+        val canReadRoster = actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId());
         if (!canReadRoster) {
             throw new ForbiddenException("Only course teacher or admin can view course students");
         }
 
-        final var enrollmentPage = enrollmentRepository.findByCourseId(courseId, pageable);
-        final var studentIds = enrollmentPage.stream().map(EnrollmentEntity::getUserId).toList();
+        val enrollmentPage = enrollmentRepository.findByCourseId(courseId, pageable);
+        val studentIds = enrollmentPage.stream().map(EnrollmentEntity::getUserId).toList();
         if (studentIds.isEmpty()) {
             return Page.empty(pageable);
         }
         final Map<UUID, UserEntity> studentsById = userRepository.findByIdInAndRole(studentIds, UserRole.STUDENT).stream()
                 .collect(Collectors.toMap(UserEntity::getId, Function.identity()));
-        final var students = enrollmentPage.stream()
+        val students = enrollmentPage.stream()
                 .map(enrollment -> studentsById.get(enrollment.getUserId()))
                 .filter(java.util.Objects::nonNull)
                 .map(userMapper::toResponse)

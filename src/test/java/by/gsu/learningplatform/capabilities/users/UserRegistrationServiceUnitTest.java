@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.users;
 
+import lombok.val;
 import by.gsu.learningplatform.core.error.BadRequestException;
 import by.gsu.learningplatform.core.error.ConflictException;
 import org.junit.jupiter.api.Test;
@@ -30,14 +31,14 @@ class UserRegistrationServiceUnitTest {
 
     @Test
     void shouldRejectAdminSelfRegistration() {
-        final var request = new UserRegistrationRequest("admin", "admin@example.com", "Passw0rd!", UserRole.ADMIN);
+        val request = new UserRegistrationRequest("admin", "admin@example.com", "Passw0rd!", UserRole.ADMIN);
 
         assertThrows(BadRequestException.class, () -> service.register(request));
     }
 
     @Test
     void shouldRejectDuplicateUsername() {
-        final var request = new UserRegistrationRequest("student", "student@example.com", "Passw0rd!", UserRole.STUDENT);
+        val request = new UserRegistrationRequest("student", "student@example.com", "Passw0rd!", UserRole.STUDENT);
         when(userRepository.findByUsername("student")).thenReturn(Optional.of(new UserEntity()));
 
         assertThrows(ConflictException.class, () -> service.register(request));
@@ -45,7 +46,7 @@ class UserRegistrationServiceUnitTest {
 
     @Test
     void shouldRejectDuplicateEmail() {
-        final var request = new UserRegistrationRequest("student", "student@example.com", "Passw0rd!", UserRole.STUDENT);
+        val request = new UserRegistrationRequest("student", "student@example.com", "Passw0rd!", UserRole.STUDENT);
         when(userRepository.findByUsername("student")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("student@example.com")).thenReturn(Optional.of(new UserEntity()));
 
@@ -54,13 +55,13 @@ class UserRegistrationServiceUnitTest {
 
     @Test
     void shouldRegisterStudent() {
-        final var request = new UserRegistrationRequest("student", "student@example.com", "Passw0rd!", UserRole.STUDENT);
+        val request = new UserRegistrationRequest("student", "student@example.com", "Passw0rd!", UserRole.STUDENT);
         when(userRepository.findByUsername("student")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("student@example.com")).thenReturn(Optional.empty());
         when(keycloakAdminClient.createUserAndAssignRole("student", "student@example.com", "Passw0rd!", "STUDENT"))
                 .thenReturn("kc-sub-1");
 
-        final var saved = new UserEntity();
+        val saved = new UserEntity();
         saved.setId(UUID.randomUUID());
         saved.setKeycloakSub("kc-sub-1");
         saved.setUsername("student");
@@ -69,7 +70,7 @@ class UserRegistrationServiceUnitTest {
 
         when(userRepository.save(any(UserEntity.class))).thenReturn(saved);
 
-        final var response = service.register(request);
+        val response = service.register(request);
 
         assertEquals("kc-sub-1", response.keycloakSub());
         assertEquals("student", response.username());

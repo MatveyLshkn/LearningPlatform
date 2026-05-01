@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.submissions;
 
+import lombok.val;
 import jakarta.validation.Valid;
 import by.gsu.learningplatform.core.web.CursorPageResponse;
 import by.gsu.learningplatform.core.web.PaginationUtils;
@@ -24,14 +25,14 @@ public class SubmissionController {
     private final SubmissionService submissionService;
     private final PaginationUtils paginationUtils;
 
-    public SubmissionController(SubmissionService submissionService, PaginationUtils paginationUtils) {
+    public SubmissionController(final SubmissionService submissionService, final PaginationUtils paginationUtils) {
         this.submissionService = submissionService;
         this.paginationUtils = paginationUtils;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public SubmissionResponse submit(@Valid @RequestBody SubmissionCreateRequest request) {
+    public SubmissionResponse submit( @Valid @RequestBody final SubmissionCreateRequest request) {
         return submissionService.submit(request);
     }
 
@@ -44,8 +45,8 @@ public class SubmissionController {
     @GetMapping("/me")
     public CursorPageResponse<SubmissionResponse> listOwn(@org.springframework.web.bind.annotation.RequestParam(required = false) Integer limit,
                                                           @org.springframework.web.bind.annotation.RequestParam(required = false) String cursor) {
-        final var pageable = paginationUtils.toPageable(limit, cursor);
-        final var page = submissionService.listOwn(pageable);
+        val pageable = paginationUtils.toPageable(limit, cursor);
+        val page = submissionService.listOwn(pageable);
         return new CursorPageResponse<>(
                 page.getContent(),
                 new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), paginationUtils.nextCursor(page)),
@@ -56,8 +57,8 @@ public class SubmissionController {
     public CursorPageResponse<SubmissionResponse> listByAssessment(@PathVariable UUID assessmentId,
                                                                    @org.springframework.web.bind.annotation.RequestParam(required = false) Integer limit,
                                                                    @org.springframework.web.bind.annotation.RequestParam(required = false) String cursor) {
-        final var pageable = paginationUtils.toPageable(limit, cursor);
-        final var page = submissionService.listByAssessment(assessmentId, pageable);
+        val pageable = paginationUtils.toPageable(limit, cursor);
+        val page = submissionService.listByAssessment(assessmentId, pageable);
         return new CursorPageResponse<>(
                 page.getContent(),
                 new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), paginationUtils.nextCursor(page)),

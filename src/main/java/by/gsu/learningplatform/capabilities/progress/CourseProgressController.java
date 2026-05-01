@@ -16,17 +16,17 @@ public class CourseProgressController {
 
     private final CourseProgressService courseProgressService;
 
-    public CourseProgressController(CourseProgressService courseProgressService) {
+    public CourseProgressController(final CourseProgressService courseProgressService) {
         this.courseProgressService = courseProgressService;
     }
 
     @GetMapping("/progress/me")
-    public CourseProgressResponse ownProgress(@PathVariable UUID courseId) {
+    public CourseProgressResponse ownProgress( @PathVariable final UUID courseId) {
         return courseProgressService.getOwnProgress(courseId);
     }
 
     @GetMapping("/users/{userId}/progress")
-    public CourseProgressResponse userProgress(@PathVariable UUID courseId, @PathVariable UUID userId) {
+    public CourseProgressResponse userProgress( @PathVariable final UUID courseId, @PathVariable final UUID userId) {
         return courseProgressService.getProgress(courseId, userId);
     }
 

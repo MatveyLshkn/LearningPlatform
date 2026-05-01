@@ -11,7 +11,7 @@ public class AdminController {
 
     private final AdminStatisticsService adminStatisticsService;
 
-    public AdminController(AdminStatisticsService adminStatisticsService) {
+    public AdminController(final AdminStatisticsService adminStatisticsService) {
         this.adminStatisticsService = adminStatisticsService;
     }
 

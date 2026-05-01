@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.admin;
 
+import lombok.val;
 import by.gsu.learningplatform.capabilities.courses.CourseRepository;
 import by.gsu.learningplatform.capabilities.enrollments.EnrollmentRepository;
 import by.gsu.learningplatform.capabilities.submissions.SubmissionRepository;
@@ -31,10 +32,10 @@ public class AdminStatisticsService {
     }
 
     public PlatformStatisticsResponse getPlatformStatistics() {
-        final var usersCount = userRepository.count();
-        final var coursesCount = courseRepository.count();
-        final var enrollmentsCount = enrollmentRepository.count();
-        final var avgScore = submissionRepository.averageScore();
+        val usersCount = userRepository.count();
+        val coursesCount = courseRepository.count();
+        val enrollmentsCount = enrollmentRepository.count();
+        val avgScore = submissionRepository.averageScore();
 
         businessMetrics.setActiveUsers(Math.toIntExact(usersCount));
         return new PlatformStatisticsResponse(usersCount, coursesCount, enrollmentsCount, avgScore);

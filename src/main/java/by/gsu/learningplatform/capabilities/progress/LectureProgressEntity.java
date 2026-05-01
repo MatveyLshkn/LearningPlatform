@@ -32,7 +32,7 @@ public class LectureProgressEntity {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -40,7 +40,7 @@ public class LectureProgressEntity {
         return userId;
     }
 
-    public void setUserId(UUID userId) {
+    public void setUserId(final UUID userId) {
         this.userId = userId;
     }
 
@@ -48,7 +48,7 @@ public class LectureProgressEntity {
         return lectureId;
     }
 
-    public void setLectureId(UUID lectureId) {
+    public void setLectureId(final UUID lectureId) {
         this.lectureId = lectureId;
     }
 
@@ -56,7 +56,7 @@ public class LectureProgressEntity {
         return completedAt;
     }
 
-    public void setCompletedAt(OffsetDateTime completedAt) {
+    public void setCompletedAt(final OffsetDateTime completedAt) {
         this.completedAt = completedAt;
     }
 }

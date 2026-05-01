@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.users;
 
+import lombok.val;
 import by.gsu.learningplatform.core.config.LearningPlatformProperties;
 import by.gsu.learningplatform.core.error.BadRequestException;
 import org.springframework.http.MediaType;
@@ -22,23 +23,23 @@ public class KeycloakAdminClient {
             new ParameterizedTypeReference<>() {};
     private static final ParameterizedTypeReference<List<Map<String, Object>>> listOfMapsType =
             new ParameterizedTypeReference<>() {};
-    private static final String authorizationHeader = "Authorization";
-    private static final String bearerPrefix = "Bearer ";
-    private static final String locationHeader = "Location";
-    private static final String accessTokenField = "access_token";
-    private static final String passwordCredentialType = "password";
-    private static final String adminCliClientId = "admin-cli";
-    private static final String masterRealm = "master";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String LOCATION_HEADER = "Location";
+    private static final String ACCESS_TOKEN_FIELD = "access_token";
+    private static final String PASSWORD_CREDENTIAL_TYPE = "password";
+    private static final String ADMIN_CLI_CLIENT_ID = "admin-cli";
+    private static final String MASTER_REALM = "master";
 
-    public KeycloakAdminClient(LearningPlatformProperties properties, RestClient.Builder restClientBuilder) {
+    public KeycloakAdminClient(final LearningPlatformProperties properties, final RestClient.Builder restClientBuilder) {
         this.keycloak = properties.keycloak();
         this.restClient = restClientBuilder.build();
     }
 
-    public String createUserAndAssignRole(String username, String email, String password, String role) {
-        final var adminToken = getAdminAccessToken();
+    public String createUserAndAssignRole(final String username, final String email, final String password, final String role) {
+        val adminToken = getAdminAccessToken();
 
-        final var userPayload = Map.of(
+        val userPayload = Map.of(
                 "username", username,
                 "email", email,
                 "enabled", true,
@@ -47,35 +48,35 @@ public class KeycloakAdminClient {
                 "emailVerified", true
         );
 
-        final var createResponse = executeKeycloakRequest(() -> restClient.post()
+        val createResponse = executeKeycloakRequest(() -> restClient.post()
                 .uri(URI.create(keycloak.adminUrl() + "/admin/realms/" + keycloak.realm() + "/users"))
-                .header(authorizationHeader, bearerPrefix + adminToken)
+                .header(AUTHORIZATION_HEADER, BEARER_PREFIX + adminToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(userPayload)
                 .retrieve()
                 .toBodilessEntity());
 
-        final var location = createResponse.getHeaders().getFirst(locationHeader);
+        val location = createResponse.getHeaders().getFirst(LOCATION_HEADER);
         if (location == null || location.isBlank()) {
             throw new BadRequestException("Unable to obtain Keycloak user identifier");
         }
-        final var userId = location.substring(location.lastIndexOf('/') + 1);
+        val userId = location.substring(location.lastIndexOf('/') + 1);
 
         setPassword(adminToken, userId, password);
         assignRealmRole(adminToken, userId, role);
         return userId;
     }
 
-    private void setPassword(String adminToken, String userId, String password) {
-        final var credentialPayload = Map.of(
-                "type", passwordCredentialType,
+    private void setPassword(final String adminToken, final String userId, final String password) {
+        val credentialPayload = Map.of(
+                "type", PASSWORD_CREDENTIAL_TYPE,
                 "value", password,
                 "temporary", false
         );
 
         executeKeycloakRequest(() -> restClient.put()
                 .uri(URI.create(keycloak.adminUrl() + "/admin/realms/" + keycloak.realm() + "/users/" + userId + "/reset-password"))
-                .header(authorizationHeader, bearerPrefix + adminToken)
+                .header(AUTHORIZATION_HEADER, BEARER_PREFIX + adminToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(credentialPayload)
                 .retrieve()
@@ -84,7 +85,7 @@ public class KeycloakAdminClient {
 
     private String getAdminAccessToken() {
         try {
-            final var token = getServiceAccountToken();
+            val token = getServiceAccountToken();
             if (canAccessRealmAdministration(token)) {
                 return token;
             }
@@ -95,11 +96,11 @@ public class KeycloakAdminClient {
     }
 
     private String getServiceAccountToken() {
-        final var form = new LinkedMultiValueMap<String, String>();
+        val form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "client_credentials");
         form.add("client_id", keycloak.clientId());
         form.add("client_secret", keycloak.clientSecret());
-        final var body = executeKeycloakRequest(() -> restClient.post()
+        val body = executeKeycloakRequest(() -> restClient.post()
                 .uri(URI.create(keycloak.adminUrl() + "/realms/" + keycloak.realm() + "/protocol/openid-connect/token"))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(form)
@@ -109,13 +110,13 @@ public class KeycloakAdminClient {
     }
 
     private String getMasterAdminPasswordToken() {
-        final var form = new LinkedMultiValueMap<String, String>();
+        val form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "password");
-        form.add("client_id", adminCliClientId);
+        form.add("client_id", ADMIN_CLI_CLIENT_ID);
         form.add("username", keycloak.adminUsername());
         form.add("password", keycloak.adminPassword());
-        final var body = executeKeycloakRequest(() -> restClient.post()
-                .uri(URI.create(keycloak.adminUrl() + "/realms/" + masterRealm + "/protocol/openid-connect/token"))
+        val body = executeKeycloakRequest(() -> restClient.post()
+                .uri(URI.create(keycloak.adminUrl() + "/realms/" + MASTER_REALM + "/protocol/openid-connect/token"))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(form)
                 .retrieve()
@@ -123,18 +124,18 @@ public class KeycloakAdminClient {
         return extractAccessToken(body);
     }
 
-    private String extractAccessToken(Map<String, Object> body) {
-        if (body == null || !body.containsKey(accessTokenField)) {
+    private String extractAccessToken(final Map<String, Object> body) {
+        if (body == null || !body.containsKey(ACCESS_TOKEN_FIELD)) {
             throw new BadRequestException("Unable to get Keycloak admin token");
         }
-        return String.valueOf(body.get(accessTokenField));
+        return String.valueOf(body.get(ACCESS_TOKEN_FIELD));
     }
 
-    private boolean canAccessRealmAdministration(String adminToken) {
+    private boolean canAccessRealmAdministration(final String adminToken) {
         try {
             restClient.get()
                     .uri(URI.create(keycloak.adminUrl() + "/admin/realms/" + keycloak.realm() + "/roles"))
-                    .header(authorizationHeader, bearerPrefix + adminToken)
+                    .header(AUTHORIZATION_HEADER, BEARER_PREFIX + adminToken)
                     .retrieve()
                     .toBodilessEntity();
             return true;
@@ -143,10 +144,10 @@ public class KeycloakAdminClient {
         }
     }
 
-    private void assignRealmRole(String adminToken, String userId, String roleName) {
-        final var allRoles = executeKeycloakRequest(() -> restClient.get()
+    private void assignRealmRole(final String adminToken, final String userId, final String roleName) {
+        val allRoles = executeKeycloakRequest(() -> restClient.get()
                 .uri(URI.create(keycloak.adminUrl() + "/admin/realms/" + keycloak.realm() + "/roles"))
-                .header(authorizationHeader, bearerPrefix + adminToken)
+                .header(AUTHORIZATION_HEADER, BEARER_PREFIX + adminToken)
                 .retrieve()
                 .body(listOfMapsType));
 
@@ -154,21 +155,21 @@ public class KeycloakAdminClient {
             throw new BadRequestException("Unable to load Keycloak roles");
         }
 
-        final var role = allRoles.stream()
+        val role = allRoles.stream()
                 .filter(r -> roleName.equalsIgnoreCase(String.valueOf(r.get("name"))))
                 .findFirst()
                 .orElseThrow(() -> new BadRequestException("Role not found in Keycloak: " + roleName));
 
         executeKeycloakRequest(() -> restClient.post()
                 .uri(URI.create(keycloak.adminUrl() + "/admin/realms/" + keycloak.realm() + "/users/" + userId + "/role-mappings/realm"))
-                .header(authorizationHeader, bearerPrefix + adminToken)
+                .header(AUTHORIZATION_HEADER, BEARER_PREFIX + adminToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(List.of(role))
                 .retrieve()
                 .toBodilessEntity());
     }
 
-    private <T> T executeKeycloakRequest(KeycloakCall<T> action) {
+    private <T> T executeKeycloakRequest(final KeycloakCall<T> action) {
         try {
             return action.call();
         } catch (RestClientResponseException ex) {

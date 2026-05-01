@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.lectures;
 
+import lombok.val;
 import by.gsu.learningplatform.capabilities.courses.CourseEntity;
 import by.gsu.learningplatform.capabilities.courses.CourseService;
 import by.gsu.learningplatform.capabilities.enrollments.EnrollmentRepository;
@@ -48,24 +49,24 @@ public class LectureService {
     }
 
     @Transactional
-    public LectureResponse create(LectureRequest request) {
+    public LectureResponse create(final LectureRequest request) {
         if ((request.videoUrl() == null || request.videoUrl().isBlank()) &&
                 (request.content() == null || request.content().isBlank())) {
             throw new BadRequestException("Either videoUrl or content must be provided");
         }
 
-        final var lesson = lessonRepository.findById(request.lessonId())
+        val lesson = lessonRepository.findById(request.lessonId())
                 .orElseThrow(() -> new NotFoundException("Lesson not found: " + request.lessonId()));
 
-        final var course = courseService.getEntity(lesson.getCourseId());
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val course = courseService.getEntity(lesson.getCourseId());
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
 
-        final var canManage = actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId());
+        val canManage = actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId());
         if (!canManage) {
             throw new ForbiddenException("Only course teacher or admin can create lectures");
         }
 
-        final var lecture = new LectureEntity();
+        val lecture = new LectureEntity();
         lecture.setLessonId(request.lessonId());
         lecture.setTitle(request.title());
         lecture.setVideoUrl(request.videoUrl());
@@ -75,35 +76,35 @@ public class LectureService {
     }
 
     @Transactional(readOnly = true)
-    public LectureResponse getById(UUID lectureId) {
-        final var lecture = lectureRepository.findById(lectureId)
+    public LectureResponse getById(final UUID lectureId) {
+        val lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(() -> new NotFoundException("Lecture not found: " + lectureId));
-        final var lesson = lessonRepository.findById(lecture.getLessonId())
+        val lesson = lessonRepository.findById(lecture.getLessonId())
                 .orElseThrow(() -> new NotFoundException("Lesson not found for lecture: " + lectureId));
-        final var course = courseService.getEntity(lesson.getCourseId());
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val course = courseService.getEntity(lesson.getCourseId());
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
         validateCanReadContent(actor, course);
         return lectureMapper.toResponse(lecture);
     }
 
     @Transactional(readOnly = true)
-    public Page<LectureResponse> listByLesson(UUID lessonId, Pageable pageable) {
-        final var lesson = lessonRepository.findById(lessonId)
+    public Page<LectureResponse> listByLesson(final UUID lessonId, final Pageable pageable) {
+        val lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new NotFoundException("Lesson not found: " + lessonId));
-        final var course = courseService.getEntity(lesson.getCourseId());
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val course = courseService.getEntity(lesson.getCourseId());
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
         validateCanReadContent(actor, course);
         return lectureRepository.findByLessonId(lessonId, pageable).map(lectureMapper::toResponse);
     }
 
     @Transactional
-    public LectureResponse update(UUID lectureId, LectureUpdateRequest request) {
-        final var lecture = lectureRepository.findById(lectureId)
+    public LectureResponse update(final UUID lectureId, final LectureUpdateRequest request) {
+        val lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(() -> new NotFoundException("Lecture not found: " + lectureId));
-        final var lesson = lessonRepository.findById(lecture.getLessonId())
+        val lesson = lessonRepository.findById(lecture.getLessonId())
                 .orElseThrow(() -> new NotFoundException("Lesson not found for lecture: " + lectureId));
-        final var course = courseService.getEntity(lesson.getCourseId());
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val course = courseService.getEntity(lesson.getCourseId());
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
         validateCanManage(actor, course);
 
         if (request.title() != null) {
@@ -126,18 +127,18 @@ public class LectureService {
     }
 
     @Transactional
-    public void delete(UUID lectureId) {
-        final var lecture = lectureRepository.findById(lectureId)
+    public void delete(final UUID lectureId) {
+        val lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(() -> new NotFoundException("Lecture not found: " + lectureId));
-        final var lesson = lessonRepository.findById(lecture.getLessonId())
+        val lesson = lessonRepository.findById(lecture.getLessonId())
                 .orElseThrow(() -> new NotFoundException("Lesson not found for lecture: " + lectureId));
-        final var course = courseService.getEntity(lesson.getCourseId());
-        final var actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
+        val course = courseService.getEntity(lesson.getCourseId());
+        val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
         validateCanManage(actor, course);
         lectureRepository.delete(lecture);
     }
 
-    private void validateCanReadContent(UserEntity actor, CourseEntity course) {
+    private void validateCanReadContent(final UserEntity actor, final CourseEntity course) {
         if (actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId())) {
             return;
         }
@@ -147,7 +148,7 @@ public class LectureService {
         throw new ForbiddenException("Only course teacher, enrolled students, or admin can view course content");
     }
 
-    private void validateCanManage(UserEntity actor, CourseEntity course) {
+    private void validateCanManage(final UserEntity actor, final CourseEntity course) {
         if (actor.getRole() == UserRole.ADMIN || actor.getId().equals(course.getTeacherId())) {
             return;
         }

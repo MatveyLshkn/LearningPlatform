@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public class NotFoundException extends ApiException {
 
-    public NotFoundException(String message) {
+    public NotFoundException(final String message) {
         super(HttpStatus.NOT_FOUND, "https://learning-platform/errors/not-found", message);
     }
 }

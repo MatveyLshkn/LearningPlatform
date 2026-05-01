@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.auth;
 
+import lombok.val;
 import by.gsu.learningplatform.core.config.LearningPlatformProperties;
 import by.gsu.learningplatform.core.error.BadRequestException;
 import org.springframework.core.ParameterizedTypeReference;
@@ -15,36 +16,36 @@ import java.util.Map;
 @Service
 public class AuthService {
 
-    private static final ParameterizedTypeReference<Map<String, Object>> mapType =
+    private static final ParameterizedTypeReference<Map<String, Object>> MAP_TYPE =
             new ParameterizedTypeReference<>() {};
-    private static final String grantType = "grant_type";
-    private static final String passwordGrant = "password";
-    private static final String clientId = "client_id";
-    private static final String clientSecret = "client_secret";
-    private static final String username = "username";
-    private static final String password = "password";
-    private static final String accessToken = "access_token";
-    private static final String tokenType = "token_type";
-    private static final String expiresIn = "expires_in";
-    private static final String refreshToken = "refresh_token";
-    private static final String refreshExpiresIn = "refresh_expires_in";
-    private static final String scope = "scope";
+    private static final String GRANT_TYPE = "grant_type";
+    private static final String PASSWORD_GRANT = "password";
+    private static final String CLIENT_ID = "client_id";
+    private static final String CLIENT_SECRET = "client_secret";
+    private static final String USERNAME = "username";
+    private static final String PASSWORD = "password";
+    private static final String ACCESS_TOKEN = "access_token";
+    private static final String TOKEN_TYPE = "token_type";
+    private static final String EXPIRES_IN = "expires_in";
+    private static final String REFRESH_TOKEN = "refresh_token";
+    private static final String REFRESH_EXPIRES_IN = "refresh_expires_in";
+    private static final String SCOPE = "scope";
 
     private final RestClient restClient;
     private final LearningPlatformProperties.KeycloakProperties keycloak;
 
-    public AuthService(LearningPlatformProperties properties, RestClient.Builder restClientBuilder) {
+    public AuthService(final LearningPlatformProperties properties, final RestClient.Builder restClientBuilder) {
         this.restClient = restClientBuilder.build();
         this.keycloak = properties.keycloak();
     }
 
-    public TokenResponse issueToken(TokenRequest request) {
-        final var form = new LinkedMultiValueMap<String, String>();
-        form.add(grantType, passwordGrant);
-        form.add(clientId, keycloak.clientId());
-        form.add(clientSecret, keycloak.clientSecret());
-        form.add(username, request.username());
-        form.add(password, request.password());
+    public TokenResponse issueToken(final TokenRequest request) {
+        val form = new LinkedMultiValueMap<String, String>();
+        form.add(GRANT_TYPE, PASSWORD_GRANT);
+        form.add(CLIENT_ID, keycloak.clientId());
+        form.add(CLIENT_SECRET, keycloak.clientSecret());
+        form.add(USERNAME, request.username());
+        form.add(PASSWORD, request.password());
 
         final Map<String, Object> body;
         try {
@@ -53,25 +54,25 @@ public class AuthService {
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .body(form)
                     .retrieve()
-                    .body(mapType);
+                    .body(MAP_TYPE);
         } catch (RestClientResponseException ex) {
             throw new BadRequestException("Invalid username or password");
         }
 
-        if (body == null || body.get(accessToken) == null) {
+        if (body == null || body.get(ACCESS_TOKEN) == null) {
             throw new BadRequestException("Unable to obtain access token");
         }
 
         return new TokenResponse(
-                String.valueOf(body.get(accessToken)),
-                String.valueOf(body.getOrDefault(tokenType, "Bearer")),
-                toLong(body.get(expiresIn)),
-                asNullableString(body.get(refreshToken)),
-                toLong(body.get(refreshExpiresIn)),
-                asNullableString(body.get(scope)));
+                String.valueOf(body.get(ACCESS_TOKEN)),
+                String.valueOf(body.getOrDefault(TOKEN_TYPE, "Bearer")),
+                toLong(body.get(EXPIRES_IN)),
+                asNullableString(body.get(REFRESH_TOKEN)),
+                toLong(body.get(REFRESH_EXPIRES_IN)),
+                asNullableString(body.get(SCOPE)));
     }
 
-    private long toLong(Object value) {
+    private long toLong(final Object value) {
         if (value == null) {
             return 0L;
         }
@@ -81,7 +82,7 @@ public class AuthService {
         return Long.parseLong(String.valueOf(value));
     }
 
-    private String asNullableString(Object value) {
+    private String asNullableString(final Object value) {
         return value == null ? null : String.valueOf(value);
     }
 }
