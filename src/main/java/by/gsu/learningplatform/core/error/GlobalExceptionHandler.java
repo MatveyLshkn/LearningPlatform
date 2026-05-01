@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
-    public ResponseEntity<ProblemResponse> handleApiException(ApiException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemResponse> handleApiException(final ApiException ex, final HttpServletRequest request) {
         return ResponseEntity.status(ex.getStatus()).body(problem(
                 ex.getType(),
                 ex.getStatus().getReasonPhrase(),
@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class})
-    public ResponseEntity<ProblemResponse> handleValidation(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemResponse> handleValidation(final Exception ex, final HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(problem(
                 "https://learning-platform/errors/validation",
                 "Validation failed",
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ProblemResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemResponse> handleAccessDenied(final AccessDeniedException ex, final HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem(
                 "https://learning-platform/errors/forbidden",
                 "Forbidden",
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ProblemResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemResponse> handleUnexpected(final Exception ex, final HttpServletRequest request) {
         return ResponseEntity.internalServerError().body(problem(
                 "https://learning-platform/errors/internal",
                 "Internal Server Error",
@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()));
     }
 
-    private ProblemResponse problem(String type, String title, int status, String detail, String instance) {
+    private ProblemResponse problem(final String type, final String title, final int status, final String detail, final String instance) {
         return new ProblemResponse(type, title, status, detail, instance, MDC.get("correlationId"), OffsetDateTime.now());
     }
 }

@@ -53,7 +53,7 @@ public class AssessmentEntity {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -61,7 +61,7 @@ public class AssessmentEntity {
         return courseId;
     }
 
-    public void setCourseId(UUID courseId) {
+    public void setCourseId(final UUID courseId) {
         this.courseId = courseId;
     }
 
@@ -69,7 +69,7 @@ public class AssessmentEntity {
         return createdBy;
     }
 
-    public void setCreatedBy(UUID createdBy) {
+    public void setCreatedBy(final UUID createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -77,7 +77,7 @@ public class AssessmentEntity {
         return createdAt;
     }
 
-    public void setCreatedAt(OffsetDateTime createdAt) {
+    public void setCreatedAt(final OffsetDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -85,7 +85,7 @@ public class AssessmentEntity {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -93,7 +93,7 @@ public class AssessmentEntity {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
@@ -101,7 +101,7 @@ public class AssessmentEntity {
         return questionsJson;
     }
 
-    public void setQuestionsJson(String questionsJson) {
+    public void setQuestionsJson(final String questionsJson) {
         this.questionsJson = questionsJson;
     }
 
@@ -109,7 +109,7 @@ public class AssessmentEntity {
         return answerKeyJson;
     }
 
-    public void setAnswerKeyJson(String answerKeyJson) {
+    public void setAnswerKeyJson(final String answerKeyJson) {
         this.answerKeyJson = answerKeyJson;
     }
 
@@ -117,7 +117,7 @@ public class AssessmentEntity {
         return rubricJson;
     }
 
-    public void setRubricJson(String rubricJson) {
+    public void setRubricJson(final String rubricJson) {
         this.rubricJson = rubricJson;
     }
 
@@ -125,7 +125,7 @@ public class AssessmentEntity {
         return sourceType;
     }
 
-    public void setSourceType(String sourceType) {
+    public void setSourceType(final String sourceType) {
         this.sourceType = sourceType;
     }
 
@@ -133,7 +133,7 @@ public class AssessmentEntity {
         return sourceId;
     }
 
-    public void setSourceId(UUID sourceId) {
+    public void setSourceId(final UUID sourceId) {
         this.sourceId = sourceId;
     }
 }

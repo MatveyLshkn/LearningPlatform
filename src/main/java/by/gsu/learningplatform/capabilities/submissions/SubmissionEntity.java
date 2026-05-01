@@ -41,7 +41,7 @@ public class SubmissionEntity {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -49,7 +49,7 @@ public class SubmissionEntity {
         return assessmentId;
     }
 
-    public void setAssessmentId(UUID assessmentId) {
+    public void setAssessmentId(final UUID assessmentId) {
         this.assessmentId = assessmentId;
     }
 
@@ -57,7 +57,7 @@ public class SubmissionEntity {
         return studentId;
     }
 
-    public void setStudentId(UUID studentId) {
+    public void setStudentId(final UUID studentId) {
         this.studentId = studentId;
     }
 
@@ -65,7 +65,7 @@ public class SubmissionEntity {
         return answerText;
     }
 
-    public void setAnswerText(String answerText) {
+    public void setAnswerText(final String answerText) {
         this.answerText = answerText;
     }
 
@@ -73,7 +73,7 @@ public class SubmissionEntity {
         return score;
     }
 
-    public void setScore(Integer score) {
+    public void setScore(final Integer score) {
         this.score = score;
     }
 
@@ -81,7 +81,7 @@ public class SubmissionEntity {
         return submittedAt;
     }
 
-    public void setSubmittedAt(OffsetDateTime submittedAt) {
+    public void setSubmittedAt(final OffsetDateTime submittedAt) {
         this.submittedAt = submittedAt;
     }
 
@@ -89,7 +89,7 @@ public class SubmissionEntity {
         return gradedAt;
     }
 
-    public void setGradedAt(OffsetDateTime gradedAt) {
+    public void setGradedAt(final OffsetDateTime gradedAt) {
         this.gradedAt = gradedAt;
     }
 }

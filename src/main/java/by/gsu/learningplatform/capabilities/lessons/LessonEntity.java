@@ -29,7 +29,7 @@ public class LessonEntity {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -37,7 +37,7 @@ public class LessonEntity {
         return courseId;
     }
 
-    public void setCourseId(UUID courseId) {
+    public void setCourseId(final UUID courseId) {
         this.courseId = courseId;
     }
 
@@ -45,7 +45,7 @@ public class LessonEntity {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -53,7 +53,7 @@ public class LessonEntity {
         return content;
     }
 
-    public void setContent(String content) {
+    public void setContent(final String content) {
         this.content = content;
     }
 }

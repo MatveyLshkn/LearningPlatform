@@ -17,7 +17,7 @@ public abstract class AuditableEntity {
         return createdAt;
     }
 
-    public void setCreatedAt(OffsetDateTime createdAt) {
+    public void setCreatedAt(final OffsetDateTime createdAt) {
         this.createdAt = createdAt;
     }
 }

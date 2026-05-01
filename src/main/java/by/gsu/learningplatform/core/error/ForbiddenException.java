@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public class ForbiddenException extends ApiException {
 
-    public ForbiddenException(String message) {
+    public ForbiddenException(final String message) {
         super(HttpStatus.FORBIDDEN, "https://learning-platform/errors/forbidden", message);
     }
 }

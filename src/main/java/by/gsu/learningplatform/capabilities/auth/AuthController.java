@@ -15,12 +15,12 @@ public class AuthController {
 
     private final AuthService authService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(final AuthService authService) {
         this.authService = authService;
     }
 
     @PostMapping(path = "/token", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public TokenResponse tokenJson(@Valid @RequestBody TokenRequest request) {
+    public TokenResponse tokenJson( @Valid @RequestBody final TokenRequest request) {
         return authService.issueToken(request);
     }
 

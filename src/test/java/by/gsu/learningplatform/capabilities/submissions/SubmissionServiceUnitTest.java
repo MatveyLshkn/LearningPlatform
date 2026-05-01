@@ -1,7 +1,9 @@
 package by.gsu.learningplatform.capabilities.submissions;
 
+import lombok.val;
 import by.gsu.learningplatform.capabilities.assessments.AssessmentService;
 import by.gsu.learningplatform.capabilities.courses.CourseService;
+import by.gsu.learningplatform.capabilities.enrollments.EnrollmentRepository;
 import by.gsu.learningplatform.capabilities.users.UserEntity;
 import by.gsu.learningplatform.capabilities.users.UserRole;
 import by.gsu.learningplatform.capabilities.users.UserService;
@@ -33,6 +35,8 @@ class SubmissionServiceUnitTest {
     @Mock
     private CourseService courseService;
     @Mock
+    private EnrollmentRepository enrollmentRepository;
+    @Mock
     private UserService userService;
     @Mock
     private AuthFacade authFacade;
@@ -44,8 +48,8 @@ class SubmissionServiceUnitTest {
 
     @Test
     void shouldRejectTeacherSubmission() {
-        final var userId = UUID.randomUUID();
-        final var teacher = new UserEntity();
+        val userId = UUID.randomUUID();
+        val teacher = new UserEntity();
         teacher.setId(userId);
         teacher.setRole(UserRole.TEACHER);
 

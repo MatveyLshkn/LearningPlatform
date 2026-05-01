@@ -8,7 +8,7 @@ public class AiPromptBuilderService {
 
     private final int maxPromptChars;
 
-    public AiPromptBuilderService(LearningPlatformProperties properties) {
+    public AiPromptBuilderService(final LearningPlatformProperties properties) {
         this.maxPromptChars = properties.ai().maxPromptChars();
     }
 
@@ -28,7 +28,7 @@ public class AiPromptBuilderService {
                 """;
     }
 
-    public String buildAssessmentDraftUserPrompt(String source, int questionCount, String difficulty) {
+    public String buildAssessmentDraftUserPrompt(final String source, final int questionCount, final String difficulty) {
         return truncate("""
                 Generate an assessment draft from the provided course material.
                 Question count: %d
@@ -60,7 +60,7 @@ public class AiPromptBuilderService {
                 """;
     }
 
-    public String buildAnalyticsUserPrompt(String deterministicSummary) {
+    public String buildAnalyticsUserPrompt(final String deterministicSummary) {
         return truncate("""
                 Analyze student performance data and provide actionable guidance.
                 Use only student IDs provided in the input.
@@ -86,7 +86,7 @@ public class AiPromptBuilderService {
                 """;
     }
 
-    public String buildStudyPlanUserPrompt(String studentSummary, String courseMaterials) {
+    public String buildStudyPlanUserPrompt(final String studentSummary, final String courseMaterials) {
         return truncate("""
                 Build a personalized plan for one student in this course.
 
@@ -98,7 +98,7 @@ public class AiPromptBuilderService {
                 """.formatted(studentSummary, courseMaterials));
     }
 
-    public String truncate(String value) {
+    public String truncate(final String value) {
         if (value.length() <= maxPromptChars) {
             return value;
         }

@@ -32,7 +32,7 @@ public class LectureEntity {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -40,7 +40,7 @@ public class LectureEntity {
         return lessonId;
     }
 
-    public void setLessonId(UUID lessonId) {
+    public void setLessonId(final UUID lessonId) {
         this.lessonId = lessonId;
     }
 
@@ -48,7 +48,7 @@ public class LectureEntity {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -56,7 +56,7 @@ public class LectureEntity {
         return videoUrl;
     }
 
-    public void setVideoUrl(String videoUrl) {
+    public void setVideoUrl(final String videoUrl) {
         this.videoUrl = videoUrl;
     }
 
@@ -64,7 +64,7 @@ public class LectureEntity {
         return content;
     }
 
-    public void setContent(String content) {
+    public void setContent(final String content) {
         this.content = content;
     }
 }

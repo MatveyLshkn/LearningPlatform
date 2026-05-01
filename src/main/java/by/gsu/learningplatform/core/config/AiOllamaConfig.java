@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.core.config;
 
+import lombok.val;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.api.OllamaApi;
@@ -17,7 +18,7 @@ public class AiOllamaConfig {
     @Bean
     public OllamaApi ollamaApi(@Value("${spring.ai.ollama.base-url:http://localhost:11434}") String baseUrl,
                                @Value("${spring.ai.ollama.api-key:}") String apiKey) {
-        final var builder = OllamaApi.builder().baseUrl(baseUrl);
+        val builder = OllamaApi.builder().baseUrl(baseUrl);
         if (StringUtils.hasText(apiKey) && !"replace-with-your-ollama-api-key".equals(apiKey)) {
             builder.restClientBuilder(RestClient.builder().defaultHeader("Authorization", "Bearer " + apiKey));
             builder.webClientBuilder(WebClient.builder().defaultHeader("Authorization", "Bearer " + apiKey));
@@ -26,8 +27,8 @@ public class AiOllamaConfig {
     }
 
     @Bean
-    public ChatModel chatModel(OllamaApi ollamaApi, LearningPlatformProperties properties) {
-        final var options = OllamaOptions.builder()
+    public ChatModel chatModel(final OllamaApi ollamaApi, final LearningPlatformProperties properties) {
+        val options = OllamaOptions.builder()
                 .model(properties.ai().model())
                 .temperature(properties.ai().temperature())
                 .numPredict(properties.ai().maxTokens())

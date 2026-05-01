@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.users;
 
+import lombok.val;
 import by.gsu.learningplatform.testsupport.EndpointIntegrationTestSupport;
 import by.gsu.learningplatform.testsupport.TestSecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Import(TestSecurityConfig.class)
 class GetUserIntegrationTest extends EndpointIntegrationTestSupport {
 
-    private static final String usersPath = "/users";
+    private static final String USERS_PATH = "/users";
     private UUID teacherId;
     private UUID studentId;
 
@@ -30,62 +31,62 @@ class GetUserIntegrationTest extends EndpointIntegrationTestSupport {
 
     @Test
     void shouldReturn401WhenNotLoggedIn() {
-        final var response = get(usersPath + "/" + teacherId, null);
+        val response = get(USERS_PATH + "/" + teacherId, null);
         assertEquals(401, response.statusCode());
     }
 
     @Test
     void shouldReturn403ForStudentRole() {
-        final var response = get(usersPath + "/" + teacherId, studentToken);
+        val response = get(USERS_PATH + "/" + teacherId, STUDENT_TOKEN);
         assertEquals(403, response.statusCode());
     }
 
     @Test
     void shouldReturn200WhenTeacherReadsOwnProfile() {
-        final var response = get(usersPath + "/" + teacherId, teacherToken);
+        val response = get(USERS_PATH + "/" + teacherId, TEACHER_TOKEN);
         assertEquals(200, response.statusCode());
     }
 
     @Test
     void shouldReturn200WhenStudentReadsOwnProfile() {
-        final var response = get(usersPath + "/" + studentId, studentToken);
+        val response = get(USERS_PATH + "/" + studentId, STUDENT_TOKEN);
         assertEquals(200, response.statusCode());
     }
 
     @Test
     void shouldReturn200ForAdminRole() {
-        final var response = get(usersPath + "/" + teacherId, adminToken);
+        val response = get(USERS_PATH + "/" + teacherId, ADMIN_TOKEN);
         assertEquals(200, response.statusCode());
     }
 
     @Test
     void shouldListUsersForAdminRole() throws Exception {
-        final var response = get(usersPath + "?role=STUDENT&limit=10", adminToken);
+        val response = get(USERS_PATH + "?role=STUDENT&limit=10", ADMIN_TOKEN);
 
         assertEquals(200, response.statusCode());
-        final var body = json(response.body());
+        val body = json(response.body());
         assertEquals(1, body.get("items").size());
         assertEquals("student-user", body.get("items").get(0).get("username").asText());
     }
 
     @Test
     void shouldReturn403WhenTeacherListsUsers() {
-        final var response = get(usersPath, teacherToken);
+        val response = get(USERS_PATH, TEACHER_TOKEN);
         assertEquals(403, response.statusCode());
     }
 
     @Test
     void shouldReturnUserDetailsForAdminRole() throws Exception {
-        final var courseId = insertCourse(teacherId, "Student course");
-        final var taughtCourseId = insertCourse(studentId, "Unexpected taught course");
-        final var assessmentId = insertAssessment(taughtCourseId, studentId, "Created assessment");
+        val courseId = insertCourse(teacherId, "Student course");
+        val taughtCourseId = insertCourse(studentId, "Unexpected taught course");
+        val assessmentId = insertAssessment(taughtCourseId, studentId, "Created assessment");
         insertEnrollment(studentId, courseId);
         insertSubmission(assessmentId, studentId, 88);
 
-        final var response = get(usersPath + "/" + studentId + "/details", adminToken);
+        val response = get(USERS_PATH + "/" + studentId + "/details", ADMIN_TOKEN);
 
         assertEquals(200, response.statusCode());
-        final var body = json(response.body());
+        val body = json(response.body());
         assertEquals("student-user", body.get("user").get("username").asText());
         assertEquals(1, body.get("enrollments").size());
         assertEquals(1, body.get("enrolledCourses").size());

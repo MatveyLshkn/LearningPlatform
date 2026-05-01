@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.enrollments;
 
+import lombok.val;
 import by.gsu.learningplatform.testsupport.EndpointIntegrationTestSupport;
 import by.gsu.learningplatform.testsupport.TestSecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,40 +17,40 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Import(TestSecurityConfig.class)
 class CreateEnrollmentIntegrationTest extends EndpointIntegrationTestSupport {
 
-    private static final String enrollmentsPath = "/enrollments";
+    private static final String ENROLLMENTS_PATH = "/enrollments";
     private UUID courseId;
 
     @BeforeEach
     void setUp() {
         clearAllTables();
         insertUser("admin-sub", "admin-user", "admin@example.com", "ADMIN");
-        final var teacherId = insertUser("teacher-sub", "teacher-user", "teacher@example.com", "TEACHER");
+        val teacherId = insertUser("teacher-sub", "teacher-user", "teacher@example.com", "TEACHER");
         insertUser("student-sub", "student-user", "student@example.com", "STUDENT");
         courseId = insertCourse(teacherId, "Course for enrollment");
     }
 
     @Test
     void shouldReturn401WhenNotLoggedIn() {
-        final var response = post(enrollmentsPath, "{\"courseId\":\"" + courseId + "\"}", null);
+        val response = post(ENROLLMENTS_PATH, "{\"courseId\":\"" + courseId + "\"}", null);
         assertEquals(401, response.statusCode());
     }
 
     @Test
     void shouldReturn403ForTeacherRole() {
-        final var response = post(enrollmentsPath, "{\"courseId\":\"" + courseId + "\"}", teacherToken);
+        val response = post(ENROLLMENTS_PATH, "{\"courseId\":\"" + courseId + "\"}", TEACHER_TOKEN);
         assertEquals(403, response.statusCode());
     }
 
     @Test
     void shouldCreateEnrollmentForStudentRole() throws Exception {
-        final var response = post(enrollmentsPath, "{\"courseId\":\"" + courseId + "\"}", studentToken);
+        val response = post(ENROLLMENTS_PATH, "{\"courseId\":\"" + courseId + "\"}", STUDENT_TOKEN);
         assertEquals(201, response.statusCode());
         assertTrue(json(response.body()).has("id"));
     }
 
     @Test
     void shouldCreateEnrollmentForAdminRole() throws Exception {
-        final var response = post(enrollmentsPath, "{\"courseId\":\"" + courseId + "\"}", adminToken);
+        val response = post(ENROLLMENTS_PATH, "{\"courseId\":\"" + courseId + "\"}", ADMIN_TOKEN);
         assertEquals(201, response.statusCode());
         assertTrue(json(response.body()).has("id"));
     }

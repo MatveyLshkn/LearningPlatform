@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.enrollments;
 
+import lombok.val;
 import by.gsu.learningplatform.capabilities.courses.CourseService;
 import by.gsu.learningplatform.capabilities.users.UserEntity;
 import by.gsu.learningplatform.capabilities.users.UserRole;
@@ -43,10 +44,10 @@ class EnrollmentServiceUnitTest {
 
     @Test
     void shouldRejectTeacherEnrollment() {
-        final var userId = UUID.randomUUID();
-        final var courseId = UUID.randomUUID();
+        val userId = UUID.randomUUID();
+        val courseId = UUID.randomUUID();
 
-        final var teacher = new UserEntity();
+        val teacher = new UserEntity();
         teacher.setId(userId);
         teacher.setRole(UserRole.TEACHER);
 
@@ -58,10 +59,10 @@ class EnrollmentServiceUnitTest {
 
     @Test
     void shouldRejectDuplicateEnrollment() {
-        final var userId = UUID.randomUUID();
-        final var courseId = UUID.randomUUID();
+        val userId = UUID.randomUUID();
+        val courseId = UUID.randomUUID();
 
-        final var student = new UserEntity();
+        val student = new UserEntity();
         student.setId(userId);
         student.setRole(UserRole.STUDENT);
 

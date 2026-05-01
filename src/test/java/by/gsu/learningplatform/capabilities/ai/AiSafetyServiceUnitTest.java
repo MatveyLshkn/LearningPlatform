@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.ai;
 
+import lombok.val;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,7 @@ class AiSafetyServiceUnitTest {
 
     @Test
     void shouldParseAssessmentDraftJson() {
-        final var json = """
+        val json = """
                 {
                   "title":"Intro Assessment",
                   "description":"Checks basics",
@@ -24,7 +25,7 @@ class AiSafetyServiceUnitTest {
                 }
                 """;
 
-        final var payload = service.parseAssessmentDraft(json);
+        val payload = service.parseAssessmentDraft(json);
 
         assertEquals("Intro Assessment", payload.title());
         assertEquals(2, payload.questions().size());
@@ -37,8 +38,8 @@ class AiSafetyServiceUnitTest {
 
     @Test
     void shouldParseAnalyticsPayload() {
-        final var studentId = UUID.randomUUID();
-        final var json = """
+        val studentId = UUID.randomUUID();
+        val json = """
                 {
                   "courseSummary":"Summary",
                   "students":[
@@ -52,7 +53,7 @@ class AiSafetyServiceUnitTest {
                 }
                 """.formatted(studentId);
 
-        final var payload = service.parseAnalyticsPayload(json);
+        val payload = service.parseAnalyticsPayload(json);
 
         assertEquals("Summary", payload.courseSummary());
         assertEquals(1, payload.students().size());

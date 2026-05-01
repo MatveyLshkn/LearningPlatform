@@ -1,5 +1,6 @@
 package by.gsu.learningplatform.capabilities.users;
 
+import lombok.val;
 import by.gsu.learningplatform.core.web.CursorPageResponse;
 import by.gsu.learningplatform.core.web.PaginationUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,7 +20,7 @@ public class UserController {
     private final UserService userService;
     private final PaginationUtils paginationUtils;
 
-    public UserController(UserService userService, PaginationUtils paginationUtils) {
+    public UserController(final UserService userService, final PaginationUtils paginationUtils) {
         this.userService = userService;
         this.paginationUtils = paginationUtils;
     }
@@ -29,22 +30,27 @@ public class UserController {
     public CursorPageResponse<UserResponse> listUsers(@RequestParam(required = false) Integer limit,
                                                       @RequestParam(required = false) String cursor,
                                                       @RequestParam(required = false) UserRole role) {
-        final var pageable = paginationUtils.toPageable(limit);
-        final var page = userService.listUsers(role, pageable);
+        val pageable = paginationUtils.toPageable(limit, cursor);
+        val page = userService.listUsers(role, pageable);
         return new CursorPageResponse<>(
                 page.getContent(),
-                new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), cursor),
-                Map.of("self", "/users"));
+                new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), paginationUtils.nextCursor(page)),
+                Map.of("self", "/users?limit=" + pageable.getPageSize() + "&cursor=" + page.getNumber() + (role == null ? "" : "&role=" + role.name())));
+    }
+
+    @GetMapping("/me")
+    public UserResponse getCurrentUser() {
+        return userService.getCurrentUserResponse();
     }
 
     @GetMapping("/{userId}")
-    public UserResponse getUser(@PathVariable UUID userId) {
+    public UserResponse getUser( @PathVariable final UUID userId) {
         return userService.getVisibleUserResponse(userId);
     }
 
     @GetMapping("/{userId}/details")
     @PreAuthorize("hasRole('ADMIN')")
-    public UserDetailsResponse getUserDetails(@PathVariable UUID userId) {
+    public UserDetailsResponse getUserDetails( @PathVariable final UUID userId) {
         return userService.getUserDetails(userId);
     }
 }

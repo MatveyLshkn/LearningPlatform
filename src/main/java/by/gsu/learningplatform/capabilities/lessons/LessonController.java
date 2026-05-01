@@ -1,8 +1,13 @@
 package by.gsu.learningplatform.capabilities.lessons;
 
+import lombok.val;
 import jakarta.validation.Valid;
+import by.gsu.learningplatform.core.web.CursorPageResponse;
+import by.gsu.learningplatform.core.web.PaginationUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -18,19 +24,44 @@ import java.util.UUID;
 public class LessonController {
 
     private final LessonService lessonService;
+    private final PaginationUtils paginationUtils;
 
-    public LessonController(LessonService lessonService) {
+    public LessonController(final LessonService lessonService, final PaginationUtils paginationUtils) {
         this.lessonService = lessonService;
+        this.paginationUtils = paginationUtils;
     }
 
     @PostMapping("/lessons")
     @ResponseStatus(HttpStatus.CREATED)
-    public LessonResponse create(@Valid @RequestBody LessonRequest request) {
+    public LessonResponse create( @Valid @RequestBody final LessonRequest request) {
         return lessonService.create(request);
     }
 
+    @GetMapping("/lessons/{lessonId}")
+    public LessonResponse get( @PathVariable final UUID lessonId) {
+        return lessonService.getById(lessonId);
+    }
+
     @GetMapping("/courses/{courseId}/lessons")
-    public List<LessonResponse> listByCourse(@PathVariable UUID courseId) {
-        return lessonService.listByCourse(courseId);
+    public CursorPageResponse<LessonResponse> listByCourse(@PathVariable UUID courseId,
+                                                           @org.springframework.web.bind.annotation.RequestParam(required = false) Integer limit,
+                                                           @org.springframework.web.bind.annotation.RequestParam(required = false) String cursor) {
+        val pageable = paginationUtils.toPageable(limit, cursor);
+        val page = lessonService.listByCourse(courseId, pageable);
+        return new CursorPageResponse<>(
+                page.getContent(),
+                new CursorPageResponse.PageMetadata(pageable.getPageSize(), page.getNumberOfElements(), paginationUtils.nextCursor(page)),
+                Map.of("self", "/courses/" + courseId + "/lessons?limit=" + pageable.getPageSize() + "&cursor=" + page.getNumber()));
+    }
+
+    @PatchMapping("/lessons/{lessonId}")
+    public LessonResponse update( @PathVariable final UUID lessonId, @Valid @RequestBody final LessonUpdateRequest request) {
+        return lessonService.update(lessonId, request);
+    }
+
+    @DeleteMapping("/lessons/{lessonId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete( @PathVariable final UUID lessonId) {
+        lessonService.delete(lessonId);
     }
 }
