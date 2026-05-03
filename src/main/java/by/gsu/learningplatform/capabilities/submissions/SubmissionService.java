@@ -74,7 +74,9 @@ public class SubmissionService {
         entity.setStudentId(actor.getId());
         entity.setAnswerText(request.answerText());
 
-        return submissionMapper.toResponse(submissionRepository.save(entity));
+        val saved = submissionRepository.saveAndFlush(entity);
+        businessMetrics.incrementSubmissions();
+        return submissionMapper.toResponse(saved);
     }
 
     @Transactional

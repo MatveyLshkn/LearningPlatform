@@ -1,0 +1,31 @@
+meta {
+  name: 11 AI Generate Assessment Draft
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/assessments/generate
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{teacherToken}}
+}
+
+body:json {
+  {
+    "courseId": "{{courseId}}",
+    "lessonId": "{{lessonId}}",
+    "questionCount": 5,
+    "difficulty": "medium"
+  }
+}
+
+script:post-response {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

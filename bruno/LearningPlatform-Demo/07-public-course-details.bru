@@ -1,0 +1,16 @@
+meta {
+  name: 07 Public Course Details
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/courses/{{courseId}}
+  auth: none
+}
+
+script:post-response {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

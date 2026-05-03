@@ -1,0 +1,30 @@
+meta {
+  name: 01 Register Teacher
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/user-registrations
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "username": "{{teacherUsername}}",
+    "email": "{{teacherEmail}}",
+    "password": "{{teacherPassword}}",
+    "role": "TEACHER"
+  }
+}
+
+script:post-response {
+  test("status is 201", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+}

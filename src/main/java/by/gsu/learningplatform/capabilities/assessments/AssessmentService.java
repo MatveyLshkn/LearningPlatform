@@ -95,9 +95,9 @@ public class AssessmentService {
         entity.setQuestionsJson(writeJson(request.questions()));
         entity.setAnswerKeyJson(writeJson(request.answerKey()));
         entity.setRubricJson(writeJson(request.rubricCriteria()));
-        applySource(entity, request.courseId(), request.lessonId(), request.lectureId());
+        validateSourceInCourseScope(request.courseId(), request.lessonId(), request.lectureId());
 
-        return assessmentMapper.toResponse(assessmentRepository.save(entity));
+        return assessmentMapper.toResponse(assessmentRepository.saveAndFlush(entity));
     }
 
     @Transactional(readOnly = true)
@@ -150,9 +150,9 @@ public class AssessmentService {
         entity.setAnswerKeyJson(writeJson(request.answerKey()));
         entity.setRubricJson(writeJson(request.rubricCriteria()));
 
-        applySource(entity, request.courseId(), request.lessonId(), request.lectureId());
+        validateSourceInCourseScope(request.courseId(), request.lessonId(), request.lectureId());
 
-        return assessmentMapper.toResponse(assessmentRepository.save(entity));
+        return assessmentMapper.toResponse(assessmentRepository.saveAndFlush(entity));
     }
 
     @Transactional(readOnly = true)
@@ -272,7 +272,7 @@ public class AssessmentService {
         }
     }
 
-    private void applySource(final AssessmentEntity entity, final UUID courseId, final UUID lessonId, final UUID lectureId) {
+    private void validateSourceInCourseScope(final UUID courseId, final UUID lessonId, final UUID lectureId) {
         if (lectureId != null) {
             val lecture = lectureRepository.findById(lectureId)
                     .orElseThrow(() -> new NotFoundException("Lecture not found: " + lectureId));
@@ -281,8 +281,6 @@ public class AssessmentService {
             if (!lesson.getCourseId().equals(courseId)) {
                 throw new BadRequestException("Lecture does not belong to the requested course");
             }
-            entity.setSourceType("LECTURE");
-            entity.setSourceId(lectureId);
             return;
         }
         if (lessonId != null) {
@@ -291,12 +289,7 @@ public class AssessmentService {
             if (!lesson.getCourseId().equals(courseId)) {
                 throw new BadRequestException("Lesson does not belong to the requested course");
             }
-            entity.setSourceType("LESSON");
-            entity.setSourceId(lessonId);
-            return;
         }
-        entity.setSourceType("COURSE");
-        entity.setSourceId(courseId);
     }
 
     private String buildSourceMaterial(final AssessmentGenerateRequest request, final CourseEntity course) {
@@ -365,8 +358,6 @@ public class AssessmentService {
                 entity.getTitle(),
                 entity.getDescription(),
                 readStringList(entity.getQuestionsJson()),
-                entity.getSourceType(),
-                entity.getSourceId(),
                 entity.getCreatedAt());
     }
 

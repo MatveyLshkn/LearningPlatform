@@ -1,0 +1,21 @@
+meta {
+  name: 16 Student Check My Submissions
+  type: http
+  seq: 16
+}
+
+get {
+  url: {{baseUrl}}/submissions/me
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{studentToken}}
+}
+
+script:post-response {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

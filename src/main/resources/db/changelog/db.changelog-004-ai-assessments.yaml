@@ -21,9 +21,3 @@ databaseChangeLog:
               - column:
                   name: rubric_json
                   type: TEXT
-              - column:
-                  name: source_type
-                  type: VARCHAR(32)
-              - column:
-                  name: source_id
-                  type: UUID

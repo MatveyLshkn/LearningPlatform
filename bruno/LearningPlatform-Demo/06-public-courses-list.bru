@@ -1,0 +1,16 @@
+meta {
+  name: 06 Public Courses List
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/courses?limit=10&cursor=0
+  auth: none
+}
+
+script:post-response {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

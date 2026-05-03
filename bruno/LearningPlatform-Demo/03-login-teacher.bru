@@ -1,0 +1,31 @@
+meta {
+  name: 03 Login Teacher
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/token
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "username": "{{teacherUsername}}",
+    "password": "{{teacherPassword}}"
+  }
+}
+
+script:post-response {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  const json = res.getBody();
+  bru.setEnvVar("teacherToken", json.accessToken);
+}

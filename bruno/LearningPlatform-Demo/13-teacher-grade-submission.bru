@@ -1,0 +1,28 @@
+meta {
+  name: 15 Teacher Grade Submission
+  type: http
+  seq: 15
+}
+
+patch {
+  url: {{baseUrl}}/submissions/{{submissionId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{teacherToken}}
+}
+
+body:json {
+  {
+    "score": 92
+  }
+}
+
+script:post-response {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

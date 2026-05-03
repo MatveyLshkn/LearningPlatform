@@ -46,6 +46,7 @@ class CreateEnrollmentIntegrationTest extends EndpointIntegrationTestSupport {
         val response = post(ENROLLMENTS_PATH, "{\"courseId\":\"" + courseId + "\"}", STUDENT_TOKEN);
         assertEquals(201, response.statusCode());
         assertTrue(json(response.body()).has("id"));
+        assertTrue(json(response.body()).hasNonNull("enrolledAt"));
     }
 
     @Test

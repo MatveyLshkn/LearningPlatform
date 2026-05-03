@@ -47,6 +47,7 @@ class CreateCourseIntegrationTest extends EndpointIntegrationTestSupport {
         val response = post(COURSES_PATH, CREATE_COURSE_PAYLOAD, TEACHER_TOKEN);
         assertEquals(201, response.statusCode());
         assertTrue(json(response.body()).has("id"));
+        assertTrue(json(response.body()).hasNonNull("createdAt"));
         assertEquals("java", json(response.body()).get("tags").get(0).asText());
         assertEquals("spring", json(response.body()).get("tags").get(1).asText());
     }

@@ -1,0 +1,16 @@
+{
+  "baseUrl": "http://localhost:8080",
+  "teacherUsername": "teacher_demo",
+  "teacherEmail": "teacher.demo@lp.local",
+  "teacherPassword": "TeachPass123!",
+  "studentUsername": "student_demo",
+  "studentEmail": "student.demo@lp.local",
+  "studentPassword": "StudPass123!",
+  "teacherToken": "",
+  "studentToken": "",
+  "courseId": "",
+  "enrollmentId": "",
+  "assessmentId": "",
+  "submissionId": "",
+  "studentId": ""
+}

@@ -8,6 +8,7 @@ import by.gsu.learningplatform.capabilities.users.UserRole;
 import by.gsu.learningplatform.capabilities.users.UserService;
 import by.gsu.learningplatform.core.error.ForbiddenException;
 import by.gsu.learningplatform.core.error.NotFoundException;
+import by.gsu.learningplatform.core.observability.BusinessMetrics;
 import by.gsu.learningplatform.core.security.AuthFacade;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,6 +37,7 @@ public class CourseService {
     private final EnrollmentRepository enrollmentRepository;
     private final AuthFacade authFacade;
     private final UserService userService;
+    private final BusinessMetrics businessMetrics;
 
     public CourseService(CourseRepository courseRepository,
                          CourseMapper courseMapper,
@@ -44,7 +46,8 @@ public class CourseService {
                          LectureRepository lectureRepository,
                          EnrollmentRepository enrollmentRepository,
                          AuthFacade authFacade,
-                         UserService userService) {
+                         UserService userService,
+                         BusinessMetrics businessMetrics) {
         this.courseRepository = courseRepository;
         this.courseMapper = courseMapper;
         this.tagRepository = tagRepository;
@@ -53,6 +56,7 @@ public class CourseService {
         this.enrollmentRepository = enrollmentRepository;
         this.authFacade = authFacade;
         this.userService = userService;
+        this.businessMetrics = businessMetrics;
     }
 
     @Transactional
@@ -68,7 +72,9 @@ public class CourseService {
         entity.setTeacherId(actor.getId());
         entity.setTags(resolveTags(request.tags()));
 
-        return courseMapper.toResponse(courseRepository.save(entity));
+        val saved = courseRepository.saveAndFlush(entity);
+        businessMetrics.incrementCourses();
+        return courseMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)

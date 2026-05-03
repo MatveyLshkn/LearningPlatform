@@ -14,6 +14,8 @@ import by.gsu.learningplatform.capabilities.users.UserService;
 import by.gsu.learningplatform.core.config.LearningPlatformProperties;
 import by.gsu.learningplatform.core.error.ForbiddenException;
 import by.gsu.learningplatform.core.security.AuthFacade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,8 @@ import java.util.UUID;
 
 @Service
 public class AiInsightsService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AiInsightsService.class);
 
     private final CourseService courseService;
     private final UserService userService;
@@ -83,10 +87,12 @@ public class AiInsightsService {
                 .sorted(Comparator.comparing(StudentSummary::studentId))
                 .toList();
 
-        val defaultSummary = "Insufficient data to generate AI summary";
-        var aiSummary = defaultSummary;
+        val noDataSummary = "Insufficient data to generate AI summary";
+        val aiUnavailableSummary = "AI provider unavailable. Showing deterministic analytics.";
+        var aiSummary = noDataSummary;
         var aiInsights = List.<AiStudentInsightPayload>of();
         if (!studentSummaries.isEmpty()) {
+            aiSummary = aiUnavailableSummary;
             try {
                 val aiResponse = aiClientService.generate(
                         aiPromptBuilderService.analyticsSystemPrompt(),
@@ -94,8 +100,8 @@ public class AiInsightsService {
                 val payload = aiSafetyService.parseAnalyticsPayload(aiResponse);
                 aiSummary = payload.courseSummary();
                 aiInsights = payload.students();
-            } catch (AiIntegrationException ignored) {
-                aiSummary = defaultSummary;
+            } catch (AiIntegrationException ex) {
+                LOGGER.warn("AI analytics fallback for course {}: {}", courseId, ex.getMessage());
             }
         }
 

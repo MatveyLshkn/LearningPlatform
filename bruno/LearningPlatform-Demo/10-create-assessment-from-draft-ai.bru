@@ -1,0 +1,46 @@
+meta {
+  name: 12 Create Assessment From Draft
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/assessments/from-draft
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{teacherToken}}
+}
+
+body:json {
+  {
+    "courseId": "{{courseId}}",
+    "lessonId": "{{lessonId}}",
+    "title": "AI Intro Quiz",
+    "description": "AI-generated draft finalized by teacher",
+    "questions": [
+      "What is Spring Boot?",
+      "What does REST stand for?"
+    ],
+    "answerKey": [
+      "Framework for rapid Spring app development",
+      "Representational State Transfer"
+    ],
+    "rubricCriteria": [
+      "Correctness",
+      "Clarity"
+    ]
+  }
+}
+
+script:post-response {
+  test("status is 201", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  const json = res.getBody();
+  bru.setEnvVar("assessmentId", json.id);
+}

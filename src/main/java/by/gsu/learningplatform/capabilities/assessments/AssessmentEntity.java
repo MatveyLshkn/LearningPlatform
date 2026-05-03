@@ -39,12 +39,6 @@ public class AssessmentEntity {
     @Column(name = "rubric_json")
     private String rubricJson;
 
-    @Column(name = "source_type")
-    private String sourceType;
-
-    @Column(name = "source_id")
-    private UUID sourceId;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
@@ -121,19 +115,4 @@ public class AssessmentEntity {
         this.rubricJson = rubricJson;
     }
 
-    public String getSourceType() {
-        return sourceType;
-    }
-
-    public void setSourceType(final String sourceType) {
-        this.sourceType = sourceType;
-    }
-
-    public UUID getSourceId() {
-        return sourceId;
-    }
-
-    public void setSourceId(final UUID sourceId) {
-        this.sourceId = sourceId;
-    }
 }

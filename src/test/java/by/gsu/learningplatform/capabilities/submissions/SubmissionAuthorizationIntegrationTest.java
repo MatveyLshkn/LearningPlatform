@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestSecurityConfig.class)
@@ -40,12 +41,13 @@ class SubmissionAuthorizationIntegrationTest extends EndpointIntegrationTestSupp
     }
 
     @Test
-    void shouldAllowEnrolledStudentSubmission() {
+    void shouldAllowEnrolledStudentSubmission() throws Exception {
         insertEnrollment(studentId, courseId);
 
         val response = post("/submissions", submissionPayload(), studentToken);
 
         assertEquals(201, response.statusCode());
+        assertTrue(json(response.body()).hasNonNull("submittedAt"));
     }
 
     @Test

@@ -11,7 +11,5 @@ public record AssessmentResponse(UUID id,
                                  String questionsJson,
                                  String answerKeyJson,
                                  String rubricJson,
-                                 String sourceType,
-                                 UUID sourceId,
                                  OffsetDateTime createdAt) {
 }

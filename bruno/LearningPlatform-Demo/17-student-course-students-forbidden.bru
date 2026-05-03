@@ -1,0 +1,20 @@
+meta {
+  name: 20 Student Course Students (403)
+  type: http
+  seq: 20
+}
+
+get {
+  url: {{baseUrl}}/courses/{{courseId}}/students
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{studentToken}}
+}
+
+script:post-response {
+  test("status is 403", function () {
+    expect(res.getStatus()).to.equal(403);
+  });
+}

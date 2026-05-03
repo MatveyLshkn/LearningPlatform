@@ -1,0 +1,33 @@
+meta {
+  name: 10 Create Lecture (Teacher)
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/lectures
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{teacherToken}}
+}
+
+body:json {
+  {
+    "lessonId": "{{lessonId}}",
+    "title": "REST API Basics",
+    "content": "REST stands for Representational State Transfer and commonly uses HTTP verbs like GET, POST, PATCH, and DELETE."
+  }
+}
+
+script:post-response {
+  test("status is 201", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  const json = res.getBody();
+  bru.setEnvVar("lectureId", json.id);
+}

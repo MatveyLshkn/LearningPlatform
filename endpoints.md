@@ -376,7 +376,7 @@ username=admin&password=admin
   - `courseId` UUID required
 - Success `201`:
 ```json
-{"id":"c99a0cb8-c3a9-4b68-bf79-2cfbcaba03f7","courseId":"40af318e-0fdf-4d33-ad7d-182778d189ed","createdBy":"760e8367-510d-4928-8145-bba08e6a5462","title":null,"description":null,"questionsJson":null,"answerKeyJson":null,"rubricJson":null,"sourceType":null,"sourceId":null,"createdAt":null}
+{"id":"c99a0cb8-c3a9-4b68-bf79-2cfbcaba03f7","courseId":"40af318e-0fdf-4d33-ad7d-182778d189ed","createdBy":"760e8367-510d-4928-8145-bba08e6a5462","title":null,"description":null,"questionsJson":null,"answerKeyJson":null,"rubricJson":null,"createdAt":null}
 ```
 - Errors:
   - `403` non-owner teacher
@@ -416,7 +416,7 @@ username=admin&password=admin
   - constraint: not both `lessonId` and `lectureId`
 - Success `201`:
 ```json
-{"id":"ee1c7303-ff02-4e00-9df7-85cf00ee5085","courseId":"40af318e-0fdf-4d33-ad7d-182778d189ed","createdBy":"760e8367-510d-4928-8145-bba08e6a5462","title":"Draft Assessment 1776711364","description":"Assessment from draft","questionsJson":"[\"Q1\",\"Q2\"]","answerKeyJson":"[\"A1\",\"A2\"]","rubricJson":"[\"R1\",\"R2\"]","sourceType":"LESSON","sourceId":"fa358598-5259-40b6-bb28-30892b00fe34","createdAt":null}
+{"id":"ee1c7303-ff02-4e00-9df7-85cf00ee5085","courseId":"40af318e-0fdf-4d33-ad7d-182778d189ed","createdBy":"760e8367-510d-4928-8145-bba08e6a5462","title":"Draft Assessment 1776711364","description":"Assessment from draft","questionsJson":"[\"Q1\",\"Q2\"]","answerKeyJson":"[\"A1\",\"A2\"]","rubricJson":"[\"R1\",\"R2\"]","createdAt":null}
 ```
 - Error:
   - `400` when both `lessonId` and `lectureId` provided

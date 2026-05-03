@@ -1,0 +1,31 @@
+meta {
+  name: 04 Login Student
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/token
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "username": "{{studentUsername}}",
+    "password": "{{studentPassword}}"
+  }
+}
+
+script:post-response {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  const json = res.getBody();
+  bru.setEnvVar("studentToken", json.accessToken);
+}

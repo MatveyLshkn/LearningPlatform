@@ -1,0 +1,32 @@
+meta {
+  name: 14 Student Submit Assessment
+  type: http
+  seq: 14
+}
+
+post {
+  url: {{baseUrl}}/submissions
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{studentToken}}
+}
+
+body:json {
+  {
+    "assessmentId": "{{assessmentId}}",
+    "answerText": "Spring Boot is a framework. REST means Representational State Transfer."
+  }
+}
+
+script:post-response {
+  test("status is 201", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  const json = res.getBody();
+  bru.setEnvVar("submissionId", json.id);
+}

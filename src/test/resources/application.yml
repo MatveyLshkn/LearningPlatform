@@ -24,6 +24,13 @@ learning-platform:
   liquibase:
     enabled: true
     changeLog: classpath:/db/changelog/db.changelog-master.yaml
+  ai:
+    model: test-model
+    temperature: 0.2
+    max-tokens: 1200
+    max-prompt-chars: 12000
+    analytics-recent-days: 21
+    timeout-seconds: 20
 
 logging:
   level:

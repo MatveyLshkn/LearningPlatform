@@ -1,0 +1,20 @@
+meta {
+  name: 19 Teacher Course Students (200)
+  type: http
+  seq: 19
+}
+
+get {
+  url: {{baseUrl}}/courses/{{courseId}}/students
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{teacherToken}}
+}
+
+script:post-response {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

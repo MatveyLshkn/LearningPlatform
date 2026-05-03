@@ -71,7 +71,7 @@ public class EnrollmentService {
         entity.setUserId(actor.getId());
         entity.setCourseId(request.courseId());
 
-        val saved = enrollmentRepository.save(entity);
+        val saved = enrollmentRepository.saveAndFlush(entity);
         businessMetrics.incrementEnrollments();
         return enrollmentMapper.toResponse(saved);
     }

@@ -9,7 +9,5 @@ public record AssessmentStudentResponse(UUID id,
                                         String title,
                                         String description,
                                         List<String> questions,
-                                        String sourceType,
-                                        UUID sourceId,
                                         OffsetDateTime createdAt) {
 }

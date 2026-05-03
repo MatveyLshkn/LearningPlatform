@@ -69,7 +69,9 @@ docker compose up --build
 ```
 
 ## What Docker Compose Bootstraps
-- PostgreSQL database `learning_platform`
+- PostgreSQL databases:
+  - `learning_platform` (application)
+  - `keycloak` (identity provider)
 - Keycloak admin user:
   - username: `admin`
   - password: `admin`

@@ -5,6 +5,7 @@
   "registrationAllowed": false,
   "rememberMe": true,
   "resetPasswordAllowed": true,
+  "accessTokenLifespan": 10800,
   "roles": {
     "realm": [
       {

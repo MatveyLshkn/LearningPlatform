@@ -1,0 +1,33 @@
+meta {
+  name: 02 Register Student
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/user-registrations
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "username": "{{studentUsername}}",
+    "email": "{{studentEmail}}",
+    "password": "{{studentPassword}}",
+    "role": "STUDENT"
+  }
+}
+
+script:post-response {
+  test("status is 201", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  const json = res.getBody();
+  bru.setEnvVar("studentId", json.userId);
+}

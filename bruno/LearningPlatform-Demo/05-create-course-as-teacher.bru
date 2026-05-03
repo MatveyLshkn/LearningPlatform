@@ -1,0 +1,33 @@
+meta {
+  name: 05 Create Course (Teacher)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/courses
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{teacherToken}}
+}
+
+body:json {
+  {
+    "title": "Java Backend Basics",
+    "description": "Spring Boot, REST, PostgreSQL",
+    "tags": ["java", "spring", "backend"]
+  }
+}
+
+script:post-response {
+  test("status is 201", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  const json = res.getBody();
+  bru.setEnvVar("courseId", json.id);
+}

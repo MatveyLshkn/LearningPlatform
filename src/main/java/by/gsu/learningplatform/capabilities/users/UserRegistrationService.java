@@ -3,6 +3,7 @@ package by.gsu.learningplatform.capabilities.users;
 import lombok.val;
 import by.gsu.learningplatform.core.error.BadRequestException;
 import by.gsu.learningplatform.core.error.ConflictException;
+import by.gsu.learningplatform.core.observability.BusinessMetrics;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,10 +12,14 @@ public class UserRegistrationService {
 
     private final UserRepository userRepository;
     private final KeycloakAdminClient keycloakAdminClient;
+    private final BusinessMetrics businessMetrics;
 
-    public UserRegistrationService(final UserRepository userRepository, final KeycloakAdminClient keycloakAdminClient) {
+    public UserRegistrationService(final UserRepository userRepository,
+                                   final KeycloakAdminClient keycloakAdminClient,
+                                   final BusinessMetrics businessMetrics) {
         this.userRepository = userRepository;
         this.keycloakAdminClient = keycloakAdminClient;
+        this.businessMetrics = businessMetrics;
     }
 
     @Transactional
@@ -43,6 +48,7 @@ public class UserRegistrationService {
         entity.setRole(request.role());
 
         val saved = userRepository.save(entity);
+        businessMetrics.incrementRegistrations();
 
         return new UserRegistrationResponse(
                 saved.getId(),
