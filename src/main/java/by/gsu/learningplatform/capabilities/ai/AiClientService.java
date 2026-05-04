@@ -31,7 +31,6 @@ public class AiClientService {
                     .build();
             val request = OllamaApi.ChatRequest.builder(learningPlatformProperties.ai().model())
                     .stream(false)
-                    .think(false)
                     .options(options)
                     .messages(List.of(
                             OllamaApi.Message.builder(OllamaApi.Message.Role.SYSTEM).content(systemPrompt).build(),

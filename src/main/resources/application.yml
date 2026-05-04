@@ -32,7 +32,7 @@ spring:
       api-key: ${OLLAMA_API_KEY}
       chat:
         options:
-          model: ${OLLAMA_MODEL:deepseek-v3.2:cloud}
+          model: ${OLLAMA_MODEL:qwen3-next:80b-cloud}
 
 server:
   port: ${SERVER_PORT:8080}
@@ -81,7 +81,7 @@ learning-platform:
     enabled: true
     changeLog: classpath:/db/changelog/db.changelog-master.yaml
   ai:
-    model: ${OLLAMA_MODEL:deepseek-v3.2:cloud}
+    model: ${OLLAMA_MODEL:qwen3-next:80b-cloud}
     temperature: ${AI_TEMPERATURE:0.2}
     max-tokens: ${AI_MAX_TOKENS:1200}
     max-prompt-chars: ${AI_MAX_PROMPT_CHARS:12000}
