@@ -30,9 +30,12 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Service
 public class AssessmentService {
+
+    private static final Pattern CYRILLIC_PATTERN = Pattern.compile("\\p{IsCyrillic}");
 
     private final AssessmentRepository assessmentRepository;
     private final AssessmentMapper assessmentMapper;
@@ -373,24 +376,56 @@ public class AssessmentService {
     }
 
     private AiAssessmentDraftPayload fallbackDraftPayload(final String courseTitle, final int questionCount, final String difficulty, final String source) {
+        val language = detectDraftLanguage(source);
         val questions = new ArrayList<String>();
         val answerKey = new ArrayList<String>();
-        val rubric = List.of(
-                "Correctness of key concept explanation",
-                "Use of course terminology and examples",
-                "Clarity and structure of the answer"
-        );
+        final List<String> rubric;
+        final String title;
+        final String description;
         val safeCount = Math.max(3, questionCount);
-        for (int i = 1; i <= safeCount; i++) {
-            questions.add("Q" + i + ". Explain one important concept from the provided material and apply it in a practical example.");
-            answerKey.add("A" + i + ". The answer should define the concept, explain why it matters, and show one practical application.");
+        if (language == DraftLanguage.RUSSIAN) {
+            rubric = List.of(
+                    "Корректность объяснения ключевой концепции",
+                    "Использование терминов курса и примеров",
+                    "Ясность и структура ответа"
+            );
+            title = "Черновик теста - " + courseTitle;
+            description = "Резервный тест сгенерирован из-за недоступности AI-провайдера. Сложность: " + difficulty + ".";
+            for (int i = 1; i <= safeCount; i++) {
+                questions.add("Вопрос " + i + ". Объясните одну важную концепцию из предоставленного материала и примените ее на практическом примере.");
+                answerKey.add("Ответ " + i + ". Ответ должен дать определение концепции, объяснить ее значение и показать один практический способ применения.");
+            }
+        } else {
+            rubric = List.of(
+                    "Correctness of key concept explanation",
+                    "Use of course terminology and examples",
+                    "Clarity and structure of the answer"
+            );
+            title = "Assessment Draft - " + courseTitle;
+            description = "Fallback assessment generated because AI provider was unavailable. Difficulty: " + difficulty + ".";
+            for (int i = 1; i <= safeCount; i++) {
+                questions.add("Q" + i + ". Explain one important concept from the provided material and apply it in a practical example.");
+                answerKey.add("A" + i + ". The answer should define the concept, explain why it matters, and show one practical application.");
+            }
         }
         return new AiAssessmentDraftPayload(
-                "Assessment Draft - " + courseTitle,
-                "Fallback assessment generated because AI provider was unavailable. Difficulty: " + difficulty + ".",
+                title,
+                description,
                 questions,
                 answerKey,
                 rubric
         );
+    }
+
+    private DraftLanguage detectDraftLanguage(final String source) {
+        if (source != null && CYRILLIC_PATTERN.matcher(source).find()) {
+            return DraftLanguage.RUSSIAN;
+        }
+        return DraftLanguage.DEFAULT;
+    }
+
+    private enum DraftLanguage {
+        DEFAULT,
+        RUSSIAN
     }
 }

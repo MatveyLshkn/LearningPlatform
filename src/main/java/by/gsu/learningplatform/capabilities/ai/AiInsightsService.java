@@ -26,11 +26,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Service
 public class AiInsightsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AiInsightsService.class);
+    private static final Pattern CYRILLIC_PATTERN = Pattern.compile("\\p{IsCyrillic}");
 
     private final CourseService courseService;
     private final UserService userService;
@@ -73,6 +75,7 @@ public class AiInsightsService {
         val actor = userService.getByKeycloakSub(authFacade.currentPrincipal().keycloakSub());
         val course = courseService.getEntity(courseId);
         validateTeacherOrAdminAccess(actor, course);
+        val language = detectLanguage(course.getTitle(), course.getDescription());
 
         val submissions = submissionRepository.findByCourseId(courseId);
         val grouped = groupByStudent(submissions);
@@ -83,12 +86,12 @@ public class AiInsightsService {
                 .toList();
 
         val studentSummaries = enrolledStudentIds.stream()
-                .map(studentId -> toStudentSummary(studentId, grouped.getOrDefault(studentId, List.of())))
+                .map(studentId -> toStudentSummary(studentId, grouped.getOrDefault(studentId, List.of()), language))
                 .sorted(Comparator.comparing(StudentSummary::studentId))
                 .toList();
 
-        val noDataSummary = "Insufficient data to generate AI summary";
-        val aiUnavailableSummary = "AI provider unavailable. Showing deterministic analytics.";
+        val noDataSummary = localizeNoDataSummary(language);
+        val aiUnavailableSummary = localizeAiUnavailableSummary(language);
         var aiSummary = noDataSummary;
         var aiInsights = List.<AiStudentInsightPayload>of();
         if (!studentSummaries.isEmpty()) {
@@ -117,7 +120,7 @@ public class AiInsightsService {
             val confidence = insight != null ? insight.confidence() : summary.defaultConfidence();
             val actions = insight != null && !insight.actions().isEmpty()
                     ? insight.actions()
-                    : List.of("Revise key concepts from recent lessons", "Practice one extra exercise daily");
+                    : defaultActions(language);
 
             students.add(new StudentAnalyticsResponse(
                     summary.studentId(),
@@ -157,8 +160,9 @@ public class AiInsightsService {
         }
 
         val studentSubmissions = submissionRepository.findByCourseIdAndStudentId(courseId, studentId);
-        val studentSummary = toStudentSummary(studentId, studentSubmissions);
         val materialSummary = buildMaterialSummary(courseId);
+        val language = detectLanguage(course.getTitle(), course.getDescription(), materialSummary);
+        val studentSummary = toStudentSummary(studentId, studentSubmissions, language);
 
         try {
             val aiResponse = aiClientService.generate(
@@ -181,11 +185,11 @@ public class AiInsightsService {
             return new AiStudyPlanResponse(
                     courseId,
                     studentId,
-                    List.of("Raise average score by at least 10 points in next two assessments"),
-                    List.of("Complete 3 focused practice sessions per week", "Submit 1 self-check reflection per week"),
+                    fallbackPrioritizedGoals(language),
+                    fallbackWeeklyTargets(language),
                     lessonRepository.findByCourseId(courseId).stream().map(lesson -> lesson.getTitle()).toList(),
                     List.of(),
-                    "Fallback plan generated because AI output was invalid."
+                    fallbackStudyPlanRationale(language)
             );
         }
     }
@@ -198,24 +202,24 @@ public class AiInsightsService {
         return grouped;
     }
 
-    private StudentSummary toStudentSummary(final UUID studentId, final List<SubmissionEntity> submissions) {
+    private StudentSummary toStudentSummary(final UUID studentId, final List<SubmissionEntity> submissions, final InsightLanguage language) {
         val graded = submissions.stream().filter(s -> s.getScore() != null).toList();
         val average = graded.stream().mapToInt(SubmissionEntity::getScore).average().orElse(0.0d);
-        val trend = calculateTrend(graded);
+        val trend = calculateTrend(graded, language);
         return new StudentSummary(
                 studentId,
                 submissions.size(),
                 graded.size(),
                 average,
                 trend,
-                defaultFocusByAverage(average),
+                defaultFocusByAverage(average, language),
                 defaultConfidenceByVolume(graded.size())
         );
     }
 
-    private String calculateTrend(final List<SubmissionEntity> gradedSubmissions) {
+    private String calculateTrend(final List<SubmissionEntity> gradedSubmissions, final InsightLanguage language) {
         if (gradedSubmissions.size() < 2) {
-            return "stable";
+            return localizeTrendStable(language);
         }
         val sorted = gradedSubmissions.stream()
                 .sorted(Comparator.comparing(SubmissionEntity::getSubmittedAt))
@@ -225,12 +229,12 @@ public class AiInsightsService {
         val recentAverage = sorted.subList(split, sorted.size()).stream().mapToInt(SubmissionEntity::getScore).average().orElse(0);
         val delta = recentAverage - olderAverage;
         if (delta > 3) {
-            return "improving";
+            return localizeTrendImproving(language);
         }
         if (delta < -3) {
-            return "declining";
+            return localizeTrendDeclining(language);
         }
-        return "stable";
+        return localizeTrendStable(language);
     }
 
     private Double calculateCourseRecencyDelta(final List<SubmissionEntity> submissions) {
@@ -249,14 +253,35 @@ public class AiInsightsService {
     }
 
     private String buildAnalyticsInput(final CourseEntity course, final List<StudentSummary> summaries) {
+        val language = detectLanguage(course.getTitle(), course.getDescription());
         val builder = new StringBuilder();
+        if (language == InsightLanguage.RUSSIAN) {
+            builder.append("Название курса: ").append(course.getTitle()).append('\n');
+            if (course.getDescription() != null && !course.getDescription().isBlank()) {
+                builder.append("Описание курса: ").append(course.getDescription()).append('\n');
+            }
+            for (val summary : summaries) {
+                builder.append("Студент: ").append(summary.studentId())
+                        .append(", всего отправок=").append(summary.totalSubmissions())
+                        .append(", проверенных отправок=").append(summary.gradedSubmissions())
+                        .append(", средний балл=").append(summary.averageScore())
+                        .append(", тренд=").append(summary.trend())
+                        .append(", фокус улучшения=").append(summary.defaultImprovementFocus())
+                        .append('\n');
+            }
+            return builder.toString();
+        }
         builder.append("Course title: ").append(course.getTitle()).append('\n');
+        if (course.getDescription() != null && !course.getDescription().isBlank()) {
+            builder.append("Course description: ").append(course.getDescription()).append('\n');
+        }
         for (val summary : summaries) {
             builder.append("Student: ").append(summary.studentId())
                     .append(", totalSubmissions=").append(summary.totalSubmissions())
                     .append(", gradedSubmissions=").append(summary.gradedSubmissions())
                     .append(", avg=").append(summary.averageScore())
                     .append(", trend=").append(summary.trend())
+                    .append(", defaultImprovementFocus=").append(summary.defaultImprovementFocus())
                     .append('\n');
         }
         return builder.toString();
@@ -264,18 +289,39 @@ public class AiInsightsService {
 
     private String buildMaterialSummary(final UUID courseId) {
         val lessons = lessonRepository.findByCourseId(courseId);
+        val language = detectLanguage(lessons.stream().map(lesson -> lesson.getTitle() + " " + lesson.getContent()).toArray(String[]::new));
         val builder = new StringBuilder();
         for (val lesson : lessons) {
-            builder.append("Lesson: ").append(lesson.getTitle()).append('\n');
+            builder.append(language == InsightLanguage.RUSSIAN ? "Урок: " : "Lesson: ").append(lesson.getTitle()).append('\n');
             val lectures = lectureRepository.findByLessonId(lesson.getId());
             for (val lecture : lectures) {
-                builder.append("Lecture: ").append(lecture.getTitle()).append('\n');
+                builder.append(language == InsightLanguage.RUSSIAN ? "Лекция: " : "Lecture: ").append(lecture.getTitle()).append('\n');
             }
         }
         return builder.toString();
     }
 
     private String buildStudentPlanInput(final CourseEntity course, final StudentSummary summary) {
+        val language = detectLanguage(course.getTitle(), course.getDescription(), summary.defaultImprovementFocus(), summary.trend());
+        if (language == InsightLanguage.RUSSIAN) {
+            return """
+                    Курс: %s
+                    StudentId: %s
+                    Всего отправок: %d
+                    Проверенных отправок: %d
+                    Средний балл: %.2f
+                    Тренд: %s
+                    Фокус улучшения: %s
+                    """.formatted(
+                    course.getTitle(),
+                    summary.studentId(),
+                    summary.totalSubmissions(),
+                    summary.gradedSubmissions(),
+                    summary.averageScore(),
+                    summary.trend(),
+                    summary.defaultImprovementFocus()
+            );
+        }
         return """
                 Course: %s
                 StudentId: %s
@@ -295,14 +341,20 @@ public class AiInsightsService {
         );
     }
 
-    private String defaultFocusByAverage(final double average) {
+    private String defaultFocusByAverage(final double average, final InsightLanguage language) {
         if (average < 60) {
-            return "Fundamentals and core concepts";
+            return language == InsightLanguage.RUSSIAN
+                    ? "Базовые знания и ключевые концепции"
+                    : "Fundamentals and core concepts";
         }
         if (average < 80) {
-            return "Consistency and deeper understanding";
+            return language == InsightLanguage.RUSSIAN
+                    ? "Стабильность и более глубокое понимание"
+                    : "Consistency and deeper understanding";
         }
-        return "Advanced application and speed";
+        return language == InsightLanguage.RUSSIAN
+                ? "Продвинутое применение и скорость"
+                : "Advanced application and speed";
     }
 
     private Double defaultConfidenceByVolume(final int gradedSubmissions) {
@@ -323,6 +375,83 @@ public class AiInsightsService {
         if (!canView) {
             throw new ForbiddenException("Only course teacher or admin can use course AI insights");
         }
+    }
+
+    private InsightLanguage detectLanguage(final String... values) {
+        for (val value : values) {
+            if (value != null && CYRILLIC_PATTERN.matcher(value).find()) {
+                return InsightLanguage.RUSSIAN;
+            }
+        }
+        return InsightLanguage.DEFAULT;
+    }
+
+    private String localizeNoDataSummary(final InsightLanguage language) {
+        return language == InsightLanguage.RUSSIAN
+                ? "Недостаточно данных для генерации AI-сводки"
+                : "Insufficient data to generate AI summary";
+    }
+
+    private String localizeTrendStable(final InsightLanguage language) {
+        return language == InsightLanguage.RUSSIAN ? "стабильный" : "stable";
+    }
+
+    private String localizeTrendImproving(final InsightLanguage language) {
+        return language == InsightLanguage.RUSSIAN ? "улучшается" : "improving";
+    }
+
+    private String localizeTrendDeclining(final InsightLanguage language) {
+        return language == InsightLanguage.RUSSIAN ? "снижается" : "declining";
+    }
+
+    private String localizeAiUnavailableSummary(final InsightLanguage language) {
+        return language == InsightLanguage.RUSSIAN
+                ? "AI-провайдер недоступен. Показана детерминированная аналитика."
+                : "AI provider unavailable. Showing deterministic analytics.";
+    }
+
+    private List<String> defaultActions(final InsightLanguage language) {
+        if (language == InsightLanguage.RUSSIAN) {
+            return List.of(
+                    "Повторить ключевые концепции из последних уроков",
+                    "Ежедневно решать по одному дополнительному упражнению"
+            );
+        }
+        return List.of(
+                "Revise key concepts from recent lessons",
+                "Practice one extra exercise daily"
+        );
+    }
+
+    private List<String> fallbackPrioritizedGoals(final InsightLanguage language) {
+        if (language == InsightLanguage.RUSSIAN) {
+            return List.of("Повысить средний балл минимум на 10 пунктов в следующих двух оцениваниях");
+        }
+        return List.of("Raise average score by at least 10 points in next two assessments");
+    }
+
+    private List<String> fallbackWeeklyTargets(final InsightLanguage language) {
+        if (language == InsightLanguage.RUSSIAN) {
+            return List.of(
+                    "Проводить 3 целевые практические сессии в неделю",
+                    "Раз в неделю отправлять 1 самопроверку с краткой рефлексией"
+            );
+        }
+        return List.of(
+                "Complete 3 focused practice sessions per week",
+                "Submit 1 self-check reflection per week"
+        );
+    }
+
+    private String fallbackStudyPlanRationale(final InsightLanguage language) {
+        return language == InsightLanguage.RUSSIAN
+                ? "Резервный план сформирован из-за некорректного или недоступного AI-ответа."
+                : "Fallback plan generated because AI output was invalid.";
+    }
+
+    private enum InsightLanguage {
+        DEFAULT,
+        RUSSIAN
     }
 
     private record StudentSummary(UUID studentId,

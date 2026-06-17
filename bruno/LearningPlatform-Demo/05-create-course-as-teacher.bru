@@ -27,7 +27,7 @@ script:post-response {
   test("status is 201", function () {
     expect(res.getStatus()).to.equal(201);
   });
-
+  
   const json = res.getBody();
   bru.setEnvVar("courseId", json.id);
 }

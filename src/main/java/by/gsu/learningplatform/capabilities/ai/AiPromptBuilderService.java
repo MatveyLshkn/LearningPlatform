@@ -25,6 +25,8 @@ public class AiPromptBuilderService {
                   "rubricCriteria": ["string"]
                 }
                 Keep question count equal to the requested count.
+                Use same natural language as the provided course material for title, description, questions, answerKey, and rubricCriteria.
+                If source material mixes languages, use the dominant language from the source material.
                 """;
     }
 
@@ -57,6 +59,9 @@ public class AiPromptBuilderService {
                   ]
                 }
                 Keep confidence in [0.0, 1.0].
+                Keep JSON field names exactly as shown in schema.
+                Write all natural-language string values in the same language as the provided course and student data.
+                If input mixes languages, use the dominant language from the input data.
                 """;
     }
 
@@ -64,6 +69,8 @@ public class AiPromptBuilderService {
         return truncate("""
                 Analyze student performance data and provide actionable guidance.
                 Use only student IDs provided in the input.
+                Keep JSON field names in English exactly as required by the schema.
+                Keep all explanatory text, summaries, focuses, and actions in the language used by the input data.
 
                 Data:
                 %s
@@ -83,12 +90,17 @@ public class AiPromptBuilderService {
                   "rationale": "string"
                 }
                 Weekly targets must be measurable.
+                Keep JSON field names exactly as shown in schema.
+                Write all natural-language string values in the same language as the provided course and student data.
+                If input mixes languages, use the dominant language from the input data.
                 """;
     }
 
     public String buildStudyPlanUserPrompt(final String studentSummary, final String courseMaterials) {
         return truncate("""
                 Build a personalized plan for one student in this course.
+                Keep JSON field names in English exactly as required by the schema.
+                Keep all goals, targets, lesson guidance, lecture guidance, and rationale in the language used by the input data.
 
                 Student performance summary:
                 %s
